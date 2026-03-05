@@ -107,7 +107,7 @@ export const NotificationCenter = ({ isOpen, onClose }: NotificationCenterProps)
         setNotifications(notifications.filter(n => n.id !== id));
     };
 
-    const getNotificationIcon = (type: string, category: string) => {
+    const getNotificationIcon = (_type: string, category: string) => {
         switch (category) {
             case 'payment':
                 return <DollarSign size={18} />;

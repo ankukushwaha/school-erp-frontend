@@ -3,11 +3,20 @@ import type { AuthenticatedRole } from '@/types/auth'
 import { ROLE_MENU } from '@/app/constants/sidebarMenu'
 
 export type MenuItem = {
+  id: number | null
+  key: string | null
   label: string
-  path: string
+  path: string | null
+  iconName: string | null
+  displayOrder: number
+  children: MenuItem[]
 }
 
 type MenuApiRecord = {
+  menuId?: unknown
+  menuKey?: unknown
+  iconName?: unknown
+  displayOrder?: unknown
   label?: unknown
   title?: unknown
   name?: unknown
@@ -52,20 +61,40 @@ function getResponseItems(payload: MenusApiResponse): MenuApiRecord[] {
   return container as MenuApiRecord[]
 }
 
-function flattenMenus(items: MenuApiRecord[]): MenuApiRecord[] {
-  return items.flatMap((item) => {
-    const children = Array.isArray(item.children) ? item.children as MenuApiRecord[] : []
-    return [item, ...flattenMenus(children)]
-  })
+function asNumber(value: unknown): number | null {
+  if (typeof value === 'number' && !isNaN(value)) return value
+  if (typeof value === 'string') {
+    const parsed = Number(value)
+    if (!isNaN(parsed)) return parsed
+  }
+  return null
+}
+
+function normalizePath(path: string | null): string | null {
+  if (!path) return null
+  if (path.startsWith('/')) return path
+  return `/${path}`
 }
 
 function normalizeMenu(item: MenuApiRecord): MenuItem | null {
   const label = asString(item.label) ?? asString(item.title) ?? asString(item.name) ?? asString(item.menuName) ?? asString(item.displayName)
-  const path = asString(item.path) ?? asString(item.route) ?? asString(item.url) ?? asString(item.menuPath) ?? asString(item.menuUrl) ?? asString(item.routePath)
+  const path = normalizePath(
+    asString(item.path) ?? asString(item.route) ?? asString(item.url) ?? asString(item.menuPath) ?? asString(item.menuUrl) ?? asString(item.routePath),
+  )
+  const childrenPayload = Array.isArray(item.children) ? (item.children as MenuApiRecord[]) : []
+  const children = childrenPayload.map(normalizeMenu).filter((entry): entry is MenuItem => entry !== null)
 
-  if (!label || !path) return null
+  if (!label) return null
 
-  return { label, path }
+  return {
+    id: asNumber(item.menuId),
+    key: asString(item.menuKey),
+    label,
+    path,
+    iconName: asString(item.iconName),
+    displayOrder: asNumber(item.displayOrder) ?? 0,
+    children: children.sort((a, b) => a.displayOrder - b.displayOrder),
+  }
 }
 
 export async function getMenus(role: AuthenticatedRole | null): Promise<MenuItem[]> {
@@ -80,10 +109,9 @@ export async function getMenus(role: AuthenticatedRole | null): Promise<MenuItem
     })
     : items
 
-  const flatItems = flattenMenus(roleFilteredItems)
-
-  return flatItems
+  return roleFilteredItems
     .map(normalizeMenu)
     .filter((item): item is MenuItem => item !== null)
+    .sort((a, b) => a.displayOrder - b.displayOrder)
 }
 
