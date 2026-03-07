@@ -1,18 +1,40 @@
-import { ADMIN_ONLY, STUDENT_ONLY, STUDENT_OR_TEACHER, TEACHER_OR_ADMIN } from '@/app/constants/roleAccess'
 import { ROUTES } from '@/app/constants/routes'
+import { getComponentForRoute, normalizeDynamicRoutePath } from '@/app/router/routeComponentMap'
+import { useMenusQuery } from '@/hooks/useMenusQuery'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
-import { AttendancePage } from '@/pages/attendance/AttendancePage'
+import { AcademicYearPage } from '@/pages/academics/AcademicYearPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
-import { FeesPage } from '@/pages/fees/FeesPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
-import { SettingsPage } from '@/pages/settings/SettingsPage'
-import { StudentsPage } from '@/pages/student/StudentsPage'
+import { TemporaryModulePage } from '@/pages/common/TemporaryModulePage'
 import { ProtectedRoute } from '@/app/router/ProtectedRoute'
+import type { MenuItem } from '@/services/menus'
+import { useAppSelector } from '@/store/hooks'
+import { useMemo } from 'react'
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom'
 
+function collectRoutePaths(paths: Set<string>, items: MenuItem[]) {
+  items.forEach((item) => {
+    if (item.path) {
+      paths.add(normalizeDynamicRoutePath(item.path))
+    }
+    if (item.children.length > 0) {
+      collectRoutePaths(paths, item.children)
+    }
+  })
+}
+
 export function AppRouter() {
+  const role = useAppSelector((state) => state.auth.role)
+  const { data: menuItems = [] } = useMenusQuery(role)
+
+  const dynamicRoutePaths = useMemo(() => {
+    const paths = new Set<string>()
+    collectRoutePaths(paths, menuItems)
+    return [...paths].filter((path) => path !== ROUTES.dashboard && path !== ROUTES.login && path !== ROUTES.profile)
+  }, [menuItems])
+
   return (
     <BrowserRouter>
       <Routes>
@@ -23,19 +45,13 @@ export function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path={ROUTES.dashboard} element={<DashboardPage />} />
-            <Route element={<ProtectedRoute allowedRoles={TEACHER_OR_ADMIN} />}>
-              <Route path={ROUTES.students} element={<StudentsPage />} />
-            </Route>
-            <Route element={<ProtectedRoute allowedRoles={ADMIN_ONLY} />}>
-              <Route path={ROUTES.fees} element={<FeesPage />} />
-              <Route path={ROUTES.settings} element={<SettingsPage />} />
-            </Route>
-            <Route element={<ProtectedRoute allowedRoles={STUDENT_OR_TEACHER} />}>
-              <Route path={ROUTES.attendance} element={<AttendancePage />} />
-            </Route>
-            <Route element={<ProtectedRoute allowedRoles={STUDENT_ONLY} />}>
-              <Route path={ROUTES.profile} element={<ProfilePage />} />
-            </Route>
+            <Route path={ROUTES.academics} element={<AcademicYearPage />} />
+            <Route path={ROUTES.profile} element={<ProfilePage />} />
+            {dynamicRoutePaths.map((path) => {
+              const DynamicComponent = getComponentForRoute(path)
+              return <Route key={path} path={path} element={<DynamicComponent />} />
+            })}
+            <Route path="*" element={<TemporaryModulePage />} />
           </Route>
         </Route>
 

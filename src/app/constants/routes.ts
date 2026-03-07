@@ -1,6 +1,7 @@
 export const ROUTES = {
   login: '/login',
   dashboard: '/dashboard',
+  academics: '/academics',
   students: '/students',
   fees: '/fees',
   settings: '/settings',
