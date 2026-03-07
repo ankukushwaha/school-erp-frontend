@@ -47,6 +47,21 @@ type AcademicYearCreateRequest = {
   }>
 }
 
+type AcademicYearUpdateRequest = {
+  academicYearId: number
+  academicYearName: string
+  startDate: string
+  endDate: string
+  isActive: boolean
+  terms: Array<{
+    termId: number
+    termName: string
+    startDate: string
+    endDate: string
+    workingDays: number
+  }>
+}
+
 type AcademicYearsApiResponse =
   | AcademicYearApiRecord[]
   | { data?: unknown; items?: unknown; result?: unknown; records?: unknown }
@@ -132,6 +147,23 @@ function toCreateRequest(payload: AcademicYearPayload): AcademicYearCreateReques
   }
 }
 
+function toUpdateRequest(id: number, payload: AcademicYearPayload): AcademicYearUpdateRequest {
+  return {
+    academicYearId: id,
+    academicYearName: payload.yearName,
+    startDate: toUtcIso(payload.startDate),
+    endDate: toUtcIso(payload.endDate),
+    isActive: payload.status === 'Active',
+    terms: payload.terms.map((term) => ({
+      termId: term.id,
+      termName: term.name,
+      startDate: toUtcIso(term.startDate),
+      endDate: toUtcIso(term.endDate),
+      workingDays: term.workingDays,
+    })),
+  }
+}
+
 function getSingleRecord(payload: unknown): AcademicYearApiRecord {
   if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
     const candidate = payload as { data?: unknown; item?: unknown; result?: unknown }
@@ -156,10 +188,11 @@ export async function createAcademicYear(payload: AcademicYearPayload): Promise<
 }
 
 export async function updateAcademicYear(id: number, payload: AcademicYearPayload): Promise<AcademicYear> {
-  const response = await backendApi.put<AcademicYear>(`/academic-years/${id}`, payload)
-  return response.data
+  const request = toUpdateRequest(id, payload)
+  const response = await backendApi.put('/master/academic-year', request)
+  return normalizeAcademicYear(getSingleRecord(response.data))
 }
 
 export async function removeAcademicYear(id: number): Promise<void> {
-  await backendApi.delete(`/academic-years/${id}`)
+  await backendApi.delete(`/master/academic-year/${id}`)
 }
