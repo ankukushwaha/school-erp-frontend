@@ -14,7 +14,7 @@ export const ROLE_MENU: Record<AuthenticatedRole, { id: number; items: SidebarIt
       { label: 'Academics', path: ROUTES.academics },
       { label: 'Students', path: ROUTES.students },
       { label: 'Fees', path: ROUTES.fees },
-      { label: 'Settings', path: ROUTES.settings },
+      { label: 'Settings', path: ROUTES.setting },
     ],
   },
   teacher: {

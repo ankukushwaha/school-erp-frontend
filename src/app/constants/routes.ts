@@ -2,9 +2,10 @@ export const ROUTES = {
   login: '/login',
   dashboard: '/dashboard',
   academics: '/academics',
+  classManagement: '/academics/class-management',
   students: '/students',
   fees: '/fees',
-  settings: '/settings',
+  setting: '/setting',
   attendance: '/attendance',
   profile: '/profile',
 } as const

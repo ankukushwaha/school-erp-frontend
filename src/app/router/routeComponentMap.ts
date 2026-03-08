@@ -1,7 +1,9 @@
 import type { ComponentType } from 'react'
 import { AcademicYearPage } from '@/pages/academics/AcademicYearPage'
+import { ClassManagementPage } from '@/pages/academics/ClassManagementPage'
 import { AttendancePage } from '@/pages/attendance/AttendancePage'
 import { TemporaryModulePage } from '@/pages/common/TemporaryModulePage'
+import { SettingsPage } from '@/pages/settings/SettingsPage'
 import { StudentsPage } from '@/pages/student/StudentsPage'
 
 function normalizeRoutePath(path: string): string {
@@ -16,8 +18,14 @@ export const routeComponentMap: Record<string, ComponentType> = {
   '/students/diary': TemporaryModulePage,
   '/students/other-details': TemporaryModulePage,
   '/academics': AcademicYearPage,
-  '/acedmics/acedmicyear': AcademicYearPage,
+  '/academics/academic-year': AcademicYearPage,
+  '/academics/classmanagement': ClassManagementPage,
+  '/academics/class-management': ClassManagementPage,
+  '/academics/classes': ClassManagementPage,
   '/attendance': AttendancePage,
+  '/setting': SettingsPage,
+  '/setting/settingspage': SettingsPage,
+  '/settings': SettingsPage,
 }
 
 export function getComponentForRoute(path: string): ComponentType {

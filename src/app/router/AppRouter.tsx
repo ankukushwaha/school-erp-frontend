@@ -4,9 +4,11 @@ import { useMenusQuery } from '@/hooks/useMenusQuery'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
 import { AcademicYearPage } from '@/pages/academics/AcademicYearPage'
+import { ClassManagementPage } from '@/pages/academics/ClassManagementPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
+import { SettingsPage } from '@/pages/settings/SettingsPage'
 import { TemporaryModulePage } from '@/pages/common/TemporaryModulePage'
 import { ProtectedRoute } from '@/app/router/ProtectedRoute'
 import type { MenuItem } from '@/services/menus'
@@ -32,7 +34,16 @@ export function AppRouter() {
   const dynamicRoutePaths = useMemo(() => {
     const paths = new Set<string>()
     collectRoutePaths(paths, menuItems)
-    return [...paths].filter((path) => path !== ROUTES.dashboard && path !== ROUTES.login && path !== ROUTES.profile)
+    return [...paths].filter(
+      (path) =>
+        path !== ROUTES.dashboard &&
+        path !== ROUTES.login &&
+        path !== ROUTES.profile &&
+        path !== ROUTES.setting &&
+        path !== ROUTES.classManagement &&
+        path !== '/academics/classmanagement' &&
+        path !== '/academics/classes',
+    )
   }, [menuItems])
 
   return (
@@ -46,7 +57,11 @@ export function AppRouter() {
           <Route element={<DashboardLayout />}>
             <Route path={ROUTES.dashboard} element={<DashboardPage />} />
             <Route path={ROUTES.academics} element={<AcademicYearPage />} />
+            <Route path={ROUTES.classManagement} element={<ClassManagementPage />} />
+            <Route path="/academics/classmanagement" element={<ClassManagementPage />} />
+            <Route path="/academics/classes" element={<ClassManagementPage />} />
             <Route path={ROUTES.profile} element={<ProfilePage />} />
+            <Route path={ROUTES.setting} element={<SettingsPage />} />
             {dynamicRoutePaths.map((path) => {
               const DynamicComponent = getComponentForRoute(path)
               return <Route key={path} path={path} element={<DynamicComponent />} />
