@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import { AcademicYearPage } from '@/pages/academics/AcademicYearPage'
 import { ClassManagementPage } from '@/pages/academics/ClassManagementPage'
+import { SectionManagementPage } from '@/pages/academics/SectionManagementPage'
 import { AttendancePage } from '@/pages/attendance/AttendancePage'
 import { TemporaryModulePage } from '@/pages/common/TemporaryModulePage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
@@ -22,6 +23,11 @@ export const routeComponentMap: Record<string, ComponentType> = {
   '/academics/classmanagement': ClassManagementPage,
   '/academics/class-management': ClassManagementPage,
   '/academics/classes': ClassManagementPage,
+  '/academics/section-management': SectionManagementPage,
+  '/academics/sectionmanagement': SectionManagementPage,
+  '/academics/session-management': SectionManagementPage,
+  '/academics/sessionmanagement': SectionManagementPage,
+ 
   '/attendance': AttendancePage,
   '/setting': SettingsPage,
   '/setting/settingspage': SettingsPage,

@@ -3,6 +3,7 @@ export const ROUTES = {
   dashboard: '/dashboard',
   academics: '/academics',
   classManagement: '/academics/class-management',
+  sectionManagement: '/academics/section-management',
   students: '/students',
   fees: '/fees',
   setting: '/setting',
