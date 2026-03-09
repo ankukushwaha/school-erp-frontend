@@ -138,7 +138,7 @@ export function SectionManagementPage() {
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-800">Session Management</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-800">Section Management</h1>
             <p className="mt-1 text-sm text-gray-500">Manage sections by class, room, and teacher allocation</p>
           </div>
         </div>

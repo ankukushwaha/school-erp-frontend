@@ -42,9 +42,7 @@ export function AppRouter() {
         path !== ROUTES.profile &&
         path !== ROUTES.setting &&
         path !== ROUTES.classManagement &&
-        path !== ROUTES.sectionManagement &&
-        path !== '/academics/classmanagement' &&
-        path !== '/academics/classes',
+        path !== ROUTES.sectionManagement 
     )
   }, [menuItems])
 
@@ -60,14 +58,7 @@ export function AppRouter() {
             <Route path={ROUTES.dashboard} element={<DashboardPage />} />
             <Route path={ROUTES.academics} element={<AcademicYearPage />} />
             <Route path={ROUTES.classManagement} element={<ClassManagementPage />} />
-            <Route path="/academics/classmanagement" element={<ClassManagementPage />} />
-            <Route path="/academics/classes" element={<ClassManagementPage />} />
             <Route path={ROUTES.sectionManagement} element={<SectionManagementPage />} />
-            <Route path="/academics/section-management" element={<SectionManagementPage />} />
-            <Route path="/academics/sectionmanagement" element={<SectionManagementPage />} />
-            <Route path="/academics/session-management" element={<SectionManagementPage />} />
-            <Route path="/academics/sessionmanagement" element={<SectionManagementPage />} />
-            <Route path="/acamdics/sectionmanagementpage" element={<SectionManagementPage />} />
             <Route path={ROUTES.profile} element={<ProfilePage />} />
             <Route path={ROUTES.setting} element={<SettingsPage />} />
             {dynamicRoutePaths.map((path) => {

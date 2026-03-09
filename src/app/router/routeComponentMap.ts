@@ -18,20 +18,11 @@ export const routeComponentMap: Record<string, ComponentType> = {
   '/students/list': StudentsPage,
   '/students/diary': TemporaryModulePage,
   '/students/other-details': TemporaryModulePage,
-  '/academics': AcademicYearPage,
   '/academics/academic-year': AcademicYearPage,
-  '/academics/classmanagement': ClassManagementPage,
-  '/academics/class-management': ClassManagementPage,
-  '/academics/classes': ClassManagementPage,
-  '/academics/section-management': SectionManagementPage,
-  '/academics/sectionmanagement': SectionManagementPage,
-  '/academics/session-management': SectionManagementPage,
-  '/academics/sessionmanagement': SectionManagementPage,
- 
+  '/academics/classManagement': ClassManagementPage,
+  '/academics/sectionManagement': SectionManagementPage,
   '/attendance': AttendancePage,
-  '/setting': SettingsPage,
-  '/setting/settingspage': SettingsPage,
-  '/settings': SettingsPage,
+  '/setting/SettingsPage': SettingsPage,
 }
 
 export function getComponentForRoute(path: string): ComponentType {
