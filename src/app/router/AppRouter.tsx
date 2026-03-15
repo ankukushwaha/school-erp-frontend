@@ -4,6 +4,7 @@ import { useMenusQuery } from '@/hooks/useMenusQuery'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
 import { AcademicYearPage } from '@/pages/academics/AcademicYearPage'
+import { AcedmicCalendarPage } from '@/pages/academics/AcedmicCalendarPage'
 import { ClassManagementPage } from '@/pages/academics/ClassManagementPage'
 import { SectionManagementPage } from '@/pages/academics/SectionManagementPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
@@ -41,6 +42,7 @@ export function AppRouter() {
         path !== ROUTES.login &&
         path !== ROUTES.profile &&
         path !== ROUTES.setting &&
+        path !== ROUTES.acedmicCalendar &&
         path !== ROUTES.classManagement &&
         path !== ROUTES.sectionManagement 
     )
@@ -57,6 +59,7 @@ export function AppRouter() {
           <Route element={<DashboardLayout />}>
             <Route path={ROUTES.dashboard} element={<DashboardPage />} />
             <Route path={ROUTES.academics} element={<AcademicYearPage />} />
+            <Route path={ROUTES.acedmicCalendar} element={<AcedmicCalendarPage />} />
             <Route path={ROUTES.classManagement} element={<ClassManagementPage />} />
             <Route path={ROUTES.sectionManagement} element={<SectionManagementPage />} />
             <Route path={ROUTES.profile} element={<ProfilePage />} />

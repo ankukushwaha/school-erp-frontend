@@ -2,6 +2,7 @@ export const ROUTES = {
   login: '/login',
   dashboard: '/dashboard',
   academics: '/academics/academic-year',
+  acedmicCalendar: '/academics/acedmic-calendar',
   classManagement: '/academics/classManagement',
   sectionManagement: '/academics/SectionManagement',
   students: '/students',

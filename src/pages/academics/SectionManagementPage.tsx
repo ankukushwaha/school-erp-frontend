@@ -1,4 +1,4 @@
-import { SectionUpsertModal, type SectionFormPayload } from '@/components/modal/SectionUpsertModal'
+import { SectionUpsertModal, type SectionFormPayload } from '@/components/modal/academics/SectionUpsertModal'
 import {
   ArrowLeft,
   Boxes,

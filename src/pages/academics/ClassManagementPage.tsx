@@ -1,5 +1,5 @@
-import { ClassCreateModal } from '@/components/modal/ClassCreateModal'
-import { ConfirmActionModal } from '@/components/modal/ConfirmActionModal'
+import { ClassCreateModal } from '@/components/modal/academics/ClassCreateModal'
+import { ConfirmActionModal } from '@/components/modal/academics/ConfirmActionModal'
 import {
   ArrowLeft,
   BookOpen,

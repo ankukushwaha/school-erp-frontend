@@ -1,4 +1,4 @@
-import { SettingsUpdateModal } from '@/components/modal/SettingsUpdateModal'
+import { SettingsUpdateModal } from '@/components/modal/settings/SettingsUpdateModal'
 import { useSchoolQuery, useUpdateSchoolMutation } from '@/hooks/useSchoolQuery'
 import type { SchoolRecord, UpdateSchoolPayload } from '@/services/school'
 import { Bell, Camera, Lock, Palette, Save, Shield, User } from 'lucide-react'
