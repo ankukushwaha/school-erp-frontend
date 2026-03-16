@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import { AcademicYearPage } from '@/pages/academics/AcademicYearPage'
 import { AcedmicCalendarPage } from '@/pages/academics/AcedmicCalendarPage'
+import { AcademicCalendarCreatePage } from '@/pages/academics/AcademicCalendarCreatePage'
 import { ClassManagementPage } from '@/pages/academics/ClassManagementPage'
 import { SectionManagementPage } from '@/pages/academics/SectionManagementPage'
 import { AttendancePage } from '@/pages/attendance/AttendancePage'
@@ -21,6 +22,7 @@ export const routeComponentMap: Record<string, ComponentType> = {
   '/students/other-details': TemporaryModulePage,
   '/academics/academic-year': AcademicYearPage,
   '/academics/calendar': AcedmicCalendarPage,
+  '/academics/acedmic-calendar/new': AcademicCalendarCreatePage,
   '/academics/classManagement': ClassManagementPage,
   '/academics/sectionManagement': SectionManagementPage,
   '/attendance': AttendancePage,
