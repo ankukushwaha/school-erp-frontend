@@ -1,5 +1,13 @@
 import { SectionUpsertModal, type SectionFormPayload } from '@/components/modal/academics/SectionUpsertModal'
 import {
+  useClassSectionsQuery,
+  useCreateClassSectionMutation,
+  useDeleteClassSectionMutation,
+  useUpdateClassSectionMutation,
+} from '@/hooks/useClassSectionsMutation'
+import { useClassesQuery } from '@/hooks/useClassesQuery'
+import type { ClassSection } from '@/services/classSections'
+import {
   ArrowLeft,
   Boxes,
   Edit2,
@@ -13,12 +21,8 @@ import {
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-type SchoolClass = {
-  id: number
-  name: string
-}
-
 type Section = {
+  classSectionId: number
   id: number
   name: string
   classId: number
@@ -28,33 +32,44 @@ type Section = {
   classTeacher: string
   capacity: number
   currentStudents: number
+  sectionId: number
+  classTeacherId: number
+  authValue: string
 }
 
-const mockClasses: SchoolClass[] = [
-  { id: 1, name: 'Nursery' },
-  { id: 2, name: 'LKG' },
-  { id: 3, name: 'UKG' },
-  { id: 4, name: 'Class 1' },
-  { id: 5, name: 'Class 2' },
-  { id: 6, name: 'Class 3' },
-]
-
-const mockSections: Section[] = [
-  { id: 1, name: 'A', classId: 1, className: 'Nursery', roomNumber: '101', floor: 'Ground Floor', classTeacher: 'Mrs. Emily', capacity: 30, currentStudents: 24 },
-  { id: 2, name: 'B', classId: 1, className: 'Nursery', roomNumber: '102', floor: 'Ground Floor', classTeacher: 'Mrs. Sarah', capacity: 30, currentStudents: 30 },
-  { id: 3, name: 'A', classId: 4, className: 'Class 1', roomNumber: '201', floor: '1st Floor', classTeacher: 'Ms. Anderson', capacity: 35, currentStudents: 32 },
-  { id: 4, name: 'B', classId: 4, className: 'Class 1', roomNumber: '202', floor: '1st Floor', classTeacher: 'Mr. Brown', capacity: 35, currentStudents: 28 },
-]
+function toSectionViewModel(item: ClassSection): Section {
+  return {
+    classSectionId: item.classSectionId,
+    id: item.classSectionId,
+    name: item.sectionName,
+    classId: item.classId,
+    className: item.className,
+    roomNumber: item.roomNumber,
+    floor: item.floor,
+    classTeacher: item.classTeacherId > 0 ? `Teacher ID: ${item.classTeacherId}` : '-',
+    capacity: item.sectionCapacity,
+    currentStudents: 0,
+    sectionId: item.sectionId,
+    classTeacherId: item.classTeacherId,
+    authValue: '555',
+  }
+}
 
 export function SectionManagementPage() {
   const navigate = useNavigate()
 
-  const [sections, setSections] = useState<Section[]>(mockSections)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedClassFilter, setSelectedClassFilter] = useState('all')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [editingSection, setEditingSection] = useState<Section | null>(null)
+  const [submitError, setSubmitError] = useState('')
+  const { data: classSections = [], isLoading: isSectionsLoading, isError: isSectionsError } = useClassSectionsQuery()
+  const { data: classes = [] } = useClassesQuery()
+  const createClassSectionMutation = useCreateClassSectionMutation()
+  const deleteClassSectionMutation = useDeleteClassSectionMutation()
+  const updateClassSectionMutation = useUpdateClassSectionMutation()
+  const sections = useMemo(() => classSections.map(toSectionViewModel), [classSections])
 
   const filteredSections = useMemo(() => {
     const query = searchTerm.trim().toLowerCase()
@@ -87,46 +102,38 @@ export function SectionManagementPage() {
     setIsModalOpen(true)
   }
 
-  const deleteSection = (sectionId: number) => {
+  const deleteSection = async (sectionId: number) => {
     if (!window.confirm('Are you sure you want to delete this section?')) return
-    setSections((prev) => prev.filter((sec) => sec.id !== sectionId))
+    await deleteClassSectionMutation.mutateAsync({
+      classSectionId: sectionId,
+      deletedBy: 'WW',
+    })
   }
 
-  const handleSubmit = (payload: SectionFormPayload) => {
-    const classObj = mockClasses.find((cls) => cls.id === payload.classId)
-    if (!classObj) return
-
+  const handleSubmit = async (payload: SectionFormPayload) => {
     if (editingSection) {
-      setSections((prev) =>
-        prev.map((sec) =>
-          sec.id === editingSection.id
-            ? {
-                ...sec,
-                name: payload.sectionName,
-                classId: payload.classId,
-                className: classObj.name,
-                roomNumber: payload.roomNumber,
-                floor: payload.floor,
-                classTeacher: payload.classTeacher,
-                capacity: payload.capacity,
-              }
-            : sec,
-        ),
-      )
-    } else {
-      const newSection: Section = {
-        id: Date.now(),
-        name: payload.sectionName,
+      await updateClassSectionMutation.mutateAsync({
+        classSectionId: payload.classSectionId ?? editingSection.classSectionId,
         classId: payload.classId,
-        className: classObj.name,
+        sectionId: payload.sectionId,
         roomNumber: payload.roomNumber,
         floor: payload.floor,
-        classTeacher: payload.classTeacher,
-        capacity: payload.capacity,
-        currentStudents: 0,
-      }
-      setSections((prev) => [...prev, newSection])
+        sectionCapacity: payload.sectionCapacity,
+        classTeacherId: payload.classTeacherId,
+        authLstEdt: payload.authValue,
+      })
+    } else {
+      await createClassSectionMutation.mutateAsync({
+        classId: payload.classId,
+        sectionId: payload.sectionId,
+        roomNumber: payload.roomNumber,
+        floor: payload.floor,
+        sectionCapacity: payload.sectionCapacity,
+        classTeacherId: payload.classTeacherId,
+        authAdd: payload.authValue,
+      })
     }
+
     setEditingSection(null)
   }
 
@@ -222,7 +229,7 @@ export function SectionManagementPage() {
             className="w-full appearance-none rounded-2xl border border-white/30 bg-white/50 px-4 py-3 font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
           >
             <option value="all">All Classes</option>
-            {mockClasses.map((cls) => (
+            {classes.map((cls) => (
               <option key={cls.id} value={cls.id}>
                 {cls.name}
               </option>
@@ -233,6 +240,8 @@ export function SectionManagementPage() {
 
       <div className="flex flex-col gap-8 lg:flex-row">
         <div className="flex-1">
+          {isSectionsError ? <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">Failed to load sections.</div> : null}
+          {submitError ? <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{submitError}</div> : null}
           <div className="overflow-hidden rounded-2xl border border-white/20 bg-white/40 shadow-lg backdrop-blur-xl">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -248,6 +257,20 @@ export function SectionManagementPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
+                  {isSectionsLoading ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-6 text-center text-sm text-gray-500">
+                        Loading sections...
+                      </td>
+                    </tr>
+                  ) : null}
+                  {!isSectionsLoading && filteredSections.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-6 text-center text-sm text-gray-500">
+                        No sections found.
+                      </td>
+                    </tr>
+                  ) : null}
                   {filteredSections.map((sec) => (
                     <tr key={sec.id} className="transition-colors hover:bg-white/40">
                       <td className="px-6 py-4">
@@ -276,7 +299,14 @@ export function SectionManagementPage() {
                             <Edit2 size={15} />
                           </button>
                           <button
-                            onClick={() => deleteSection(sec.id)}
+                            onClick={async () => {
+                              try {
+                                await deleteSection(sec.classSectionId)
+                                setSubmitError('')
+                              } catch (error) {
+                                setSubmitError(error instanceof Error ? error.message : 'Failed to delete section.')
+                              }
+                            }}
                             className="rounded-md p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-red-600"
                             aria-label={`Delete section ${sec.name}`}
                           >
@@ -291,7 +321,6 @@ export function SectionManagementPage() {
             </div>
           </div>
         </div>
-
       </div>
 
       {isModalOpen ? (
@@ -299,20 +328,32 @@ export function SectionManagementPage() {
           open={isModalOpen}
           onOpenChange={setIsModalOpen}
           mode={modalMode}
-          classOptions={mockClasses}
           initialValues={
             editingSection
               ? {
-                  sectionName: editingSection.name,
+                  classSectionId: editingSection.classSectionId,
                   classId: editingSection.classId,
+                  className: editingSection.className,
+                  sectionId: editingSection.sectionId,
+                  sectionName: editingSection.name,
                   roomNumber: editingSection.roomNumber,
                   floor: editingSection.floor,
-                  capacity: editingSection.capacity,
-                  classTeacher: editingSection.classTeacher,
+                  sectionCapacity: editingSection.capacity,
+                  classTeacherId: editingSection.classTeacherId,
+                  classTeacherName: editingSection.classTeacher,
+                  authValue: editingSection.authValue,
                 }
               : null
           }
-          onSubmit={handleSubmit}
+          onSubmit={async (payload) => {
+            try {
+              await handleSubmit(payload)
+              setSubmitError('')
+            } catch (error) {
+              setSubmitError(error instanceof Error ? error.message : 'Failed to save section.')
+              throw error
+            }
+          }}
         />
       ) : null}
     </div>

@@ -3,23 +3,30 @@ import { backendApi } from '@/services/backendApi'
 export type SchoolClass = {
   id: number
   name: string
-  code: number
+  code: string
+  order: number
+  maximumCapacity: number
+  description: string
   sections: number
   students: number
-  classTeacher: string
   subjects: number
-  fee: number
 }
 
 export type CreateClassPayload = {
+  classCode: string
   className: string
   classOrder: number
+  maximumCapacity: number
+  description: string
 }
 
 export type UpdateClassPayload = {
   classId: number
+  classCode: string
   className: string
   classOrder: number
+  maximumCapacity: number
+  description: string
 }
 
 type ClassApiRecord = {
@@ -30,20 +37,22 @@ type ClassApiRecord = {
   displayName?: unknown
   code?: unknown
   classCode?: unknown
+  classOrder?: unknown
+  numericGradeLevel?: unknown
+  gradeLevel?: unknown
+  maximumCapacity?: unknown
+  maxCapacity?: unknown
+  capacity?: unknown
+  description?: unknown
   sections?: unknown
   sectionCount?: unknown
   noOfSections?: unknown
   students?: unknown
   studentCount?: unknown
   totalStudents?: unknown
-  classTeacher?: unknown
-  teacherName?: unknown
-  classTeacherName?: unknown
   subjects?: unknown
   subjectCount?: unknown
   totalSubjects?: unknown
-  fee?: unknown
-  annualFee?: unknown
 }
 
 type ClassesApiResponse = ClassApiRecord[] | { data?: unknown; items?: unknown; result?: unknown; records?: unknown }
@@ -71,12 +80,13 @@ function normalizeClass(record: ClassApiRecord, index: number): SchoolClass {
   return {
     id: asNumber(record.id ?? record.classId, index + 1),
     name: asString(record.className ?? record.name ?? record.displayName, `Class ${index + 1}`),
-    code: asNumber(record.classCode ?? record.code, index + 1),
+    code: asString(record.classCode ?? record.code, `CL${index + 1}`),
+    order: asNumber(record.classOrder ?? record.numericGradeLevel ?? record.gradeLevel, index + 1),
+    maximumCapacity: asNumber(record.maximumCapacity ?? record.maxCapacity ?? record.capacity, 0),
+    description: asString(record.description),
     sections: asNumber(record.sections ?? record.sectionCount ?? record.noOfSections, 0),
     students: asNumber(record.students ?? record.studentCount ?? record.totalStudents, 0),
-    classTeacher: asString(record.classTeacher ?? record.classTeacherName ?? record.teacherName, '-'),
     subjects: asNumber(record.subjects ?? record.subjectCount ?? record.totalSubjects, 0),
-    fee: asNumber(record.fee ?? record.annualFee, 0),
   }
 }
 

@@ -1,14 +1,15 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { CreateClassPayload } from '@/services/classes'
-import { BookOpen, GraduationCap, Hash, Save } from 'lucide-react'
+import { BookOpen, FileText, Hash, Save, Users } from 'lucide-react'
 import { type FormEventHandler, useEffect, useState } from 'react'
 
 type ClassModalValues = {
   classId?: number
+  classCode: string
   className: string
   classOrder: number
-  classTeacher?: string
-  annualFee?: number
+  maximumCapacity: number
+  description: string
 }
 
 type ClassCreateModalProps = {
@@ -16,7 +17,7 @@ type ClassCreateModalProps = {
   onOpenChange: (open: boolean) => void
   mode: 'create' | 'edit'
   initialValues?: ClassModalValues | null
-  onSubmit: (payload: CreateClassPayload | { classId: number; className: string; classOrder: number }) => Promise<void> | void
+  onSubmit: (payload: CreateClassPayload | { classId: number; classCode: string; className: string; classOrder: number; maximumCapacity: number; description: string }) => Promise<void> | void
   isSubmitting?: boolean
 }
 
@@ -28,28 +29,44 @@ export function ClassCreateModal({
   onSubmit,
   isSubmitting = false,
 }: ClassCreateModalProps) {
+  const [classCode, setClassCode] = useState('')
   const [className, setClassName] = useState('')
   const [classOrder, setClassOrder] = useState('')
-  const [classTeacher, setClassTeacher] = useState('')
-  const [annualFee, setAnnualFee] = useState('')
+  const [maximumCapacity, setMaximumCapacity] = useState('')
+  const [description, setDescription] = useState('')
 
   useEffect(() => {
     if (!open) return
+    setClassCode(initialValues?.classCode ?? '')
     setClassName(initialValues?.className ?? '')
     setClassOrder(typeof initialValues?.classOrder === 'number' ? String(initialValues.classOrder) : '')
-    setClassTeacher(initialValues?.classTeacher ?? '')
-    setAnnualFee(typeof initialValues?.annualFee === 'number' ? String(initialValues.annualFee) : '')
+    setMaximumCapacity(typeof initialValues?.maximumCapacity === 'number' ? String(initialValues.maximumCapacity) : '')
+    setDescription(initialValues?.description ?? '')
   }, [initialValues, open])
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault()
     const parsedClassOrder = Number.parseInt(classOrder, 10)
-    if (!className.trim() || Number.isNaN(parsedClassOrder)) return
+    const parsedMaximumCapacity = Number.parseInt(maximumCapacity, 10)
+    if (!classCode.trim() || !className.trim() || Number.isNaN(parsedClassOrder) || Number.isNaN(parsedMaximumCapacity)) return
     if (mode === 'edit') {
       if (!initialValues?.classId) return
-      await onSubmit({ classId: initialValues.classId, className: className.trim(), classOrder: parsedClassOrder })
+      await onSubmit({
+        classId: initialValues.classId,
+        classCode: classCode.trim(),
+        className: className.trim(),
+        classOrder: parsedClassOrder,
+        maximumCapacity: parsedMaximumCapacity,
+        description: description.trim(),
+      })
     } else {
-      await onSubmit({ className: className.trim(), classOrder: parsedClassOrder })
+      await onSubmit({
+        classCode: classCode.trim(),
+        className: className.trim(),
+        classOrder: parsedClassOrder,
+        maximumCapacity: parsedMaximumCapacity,
+        description: description.trim(),
+      })
     }
     onOpenChange(false)
   }
@@ -62,6 +79,24 @@ export function ClassCreateModal({
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase text-gray-500">
+              Class Code <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                value={classCode}
+                onChange={(event) => setClassCode(event.target.value)}
+                placeholder="e.g. NUR, LKG, UKG, CL1"
+                className="w-full rounded-xl border border-white/30 bg-white/50 py-2.5 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                required
+              />
+            </div>
+            <p className="text-xs text-gray-500">Short code for the class</p>
+          </div>
+
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase text-gray-500">
               Class Name <span className="text-red-500">*</span>
@@ -81,7 +116,7 @@ export function ClassCreateModal({
 
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase text-gray-500">
-              Class Code <span className="text-red-500">*</span>
+              Numeric Grade Level <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -89,41 +124,43 @@ export function ClassCreateModal({
                 type="number"
                 value={classOrder}
                 onChange={(event) => setClassOrder(event.target.value)}
-                placeholder="e.g. 10"
+                placeholder="e.g. 1, 2, 3"
                 className="w-full rounded-xl border border-white/30 bg-white/50 py-2.5 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 required
               />
             </div>
-            <p className="text-xs text-gray-500">Used for sorting and identification</p>
+            <p className="text-xs text-gray-500">Used for sorting and grade order</p>
           </div>
 
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase text-gray-500">
-              Class Teacher <span className="text-red-500">*</span>
+              Maximum Capacity <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
-                type="text"
-                placeholder="Teacher name"
-                value={classTeacher}
-                onChange={(event) => setClassTeacher(event.target.value)}
+                type="number"
+                placeholder="e.g. 100"
+                value={maximumCapacity}
+                onChange={(event) => setMaximumCapacity(event.target.value)}
                 className="w-full rounded-xl border border-white/30 bg-white/50 py-2.5 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                required
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase text-gray-500">
-              Annual Fee (Rs) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              placeholder="35000"
-              value={annualFee}
-              onChange={(event) => setAnnualFee(event.target.value)}
-              className="w-full rounded-xl border border-white/30 bg-white/50 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            <label className="text-xs font-bold uppercase text-gray-500">Description</label>
+            <div className="relative">
+              <FileText className="absolute left-3 top-4 text-gray-400" size={18} />
+              <textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Brief description of the class level..."
+                rows={4}
+                className="w-full rounded-xl border border-white/30 bg-white/50 py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              />
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4">

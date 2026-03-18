@@ -1,5 +1,6 @@
 import { ClassCreateModal } from '@/components/modal/academics/ClassCreateModal'
 import { ConfirmActionModal } from '@/components/modal/academics/ConfirmActionModal'
+import { SectionCreateModal } from '@/components/modal/academics/SectionCreateModal'
 import {
   ArrowLeft,
   BookOpen,
@@ -12,6 +13,7 @@ import {
   Users,
 } from 'lucide-react'
 import { useClassesQuery, useCreateClassMutation, useDeleteClassMutation, useUpdateClassMutation } from '@/hooks/useClassesQuery'
+import { useCreateSectionMutation } from '@/hooks/useSectionsMutation'
 import { type CreateClassPayload, type SchoolClass, type UpdateClassPayload } from '@/services/classes'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -20,13 +22,16 @@ export function ClassManagementPage() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isSectionModalOpen, setIsSectionModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null)
   const [createError, setCreateError] = useState('')
+  const [sectionError, setSectionError] = useState('')
   const [deleteError, setDeleteError] = useState('')
   const { data = [], isLoading, isError } = useClassesQuery()
   const createMutation = useCreateClassMutation()
+  const createSectionMutation = useCreateSectionMutation()
   const updateMutation = useUpdateClassMutation()
   const deleteMutation = useDeleteClassMutation()
   const classCards = data
@@ -34,7 +39,7 @@ export function ClassManagementPage() {
   const filteredClasses = useMemo<SchoolClass[]>(() => {
     const query = searchTerm.trim().toLowerCase()
     if (!query) return classCards
-    return classCards.filter((item) => item.name.toLowerCase().includes(query) || item.classTeacher.toLowerCase().includes(query))
+    return classCards.filter((item) => item.name.toLowerCase().includes(query) || item.code.toLowerCase().includes(query))
   }, [classCards, searchTerm])
 
   const totalSections = classCards.reduce((acc, item) => acc + item.sections, 0)
@@ -52,17 +57,29 @@ export function ClassManagementPage() {
             <p className="mt-1 text-sm text-gray-500">Manage all classes from Nursery to Grade 12</p>
           </div>
         </div>
-        <button
-          onClick={() => {
-            setModalMode('create')
-            setSelectedClass(null)
-            setIsCreateModalOpen(true)
-          }}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 font-medium text-white shadow-lg shadow-indigo-600/30 transition-all hover:bg-indigo-700"
-        >
-          <Plus size={18} />
-          Add New Class
-        </button>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            onClick={() => {
+              setSelectedClass(null)
+              setIsSectionModalOpen(true)
+            }}
+            className="flex items-center gap-2 rounded-xl border border-indigo-200 bg-white px-5 py-2.5 font-medium text-indigo-600 shadow-sm transition-all hover:bg-indigo-50"
+          >
+            <Layers size={18} />
+            Add New Section
+          </button>
+          <button
+            onClick={() => {
+              setModalMode('create')
+              setSelectedClass(null)
+              setIsCreateModalOpen(true)
+            }}
+            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 font-medium text-white shadow-lg shadow-indigo-600/30 transition-all hover:bg-indigo-700"
+          >
+            <Plus size={18} />
+            Add New Class
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
@@ -105,8 +122,8 @@ export function ClassManagementPage() {
               <GraduationCap size={24} />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Class Teachers</p>
-              <p className="text-2xl font-bold text-gray-800">{classCards.length}</p>
+              <p className="text-sm text-gray-500">Total Subjects</p>
+              <p className="text-2xl font-bold text-gray-800">{classCards.reduce((acc, item) => acc + item.subjects, 0)}</p>
             </div>
           </div>
         </div>
@@ -118,7 +135,7 @@ export function ClassManagementPage() {
           type="text"
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder="Search classes by name or class teacher..."
+          placeholder="Search classes by name or class code..."
           className="w-full rounded-xl border border-white/30 bg-white/50 py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
         />
       </div>
@@ -129,6 +146,7 @@ export function ClassManagementPage() {
             <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">Failed to load classes.</div>
           ) : null}
           {createError ? <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{createError}</div> : null}
+          {sectionError ? <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{sectionError}</div> : null}
           {deleteError ? <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{deleteError}</div> : null}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {isLoading ? (
@@ -172,7 +190,7 @@ export function ClassManagementPage() {
                 </div>
 
                 <h3 className="mb-1 text-xl font-bold text-gray-800">{item.name}</h3>
-                <p className="mb-4 text-sm text-gray-500">Class Teacher: {item.classTeacher}</p>
+                <p className="mb-4 text-sm text-gray-500">Grade Order: {item.order}</p>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
@@ -189,15 +207,19 @@ export function ClassManagementPage() {
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="flex items-center gap-2 text-gray-500">
+                      <Users size={14} /> Capacity
+                    </span>
+                    <span className="font-bold text-gray-800">{item.maximumCapacity}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2 text-gray-500">
                       <BookOpen size={14} /> Subjects
                     </span>
                     <span className="font-bold text-gray-800">{item.subjects}</span>
                   </div>
-                  <div className="flex items-center justify-between border-t border-gray-200 pt-2 text-sm">
-                    <span className="text-gray-500">Annual Fee</span>
-                    <span className="font-bold text-indigo-600">Rs {item.fee.toLocaleString()}</span>
-                  </div>
                 </div>
+
+                {item.description ? <p className="mt-4 border-t border-gray-200 pt-4 text-sm text-gray-500">{item.description}</p> : null}
 
                 <div className="mt-4 flex gap-2 border-t border-gray-200 pt-4">
                   <Link to={`/academics/sections?class=${item.id}`} className="flex-1 rounded-lg py-2 text-center text-xs font-medium text-indigo-600 transition-colors hover:bg-indigo-50">
@@ -221,10 +243,11 @@ export function ClassManagementPage() {
           modalMode === 'edit' && selectedClass
             ? {
                 classId: selectedClass.id,
+                classCode: selectedClass.code,
                 className: selectedClass.name,
-                classOrder: selectedClass.code,
-                classTeacher: selectedClass.classTeacher,
-                annualFee: selectedClass.fee,
+                classOrder: selectedClass.order,
+                maximumCapacity: selectedClass.maximumCapacity,
+                description: selectedClass.description,
               }
             : null
         }
@@ -239,6 +262,22 @@ export function ClassManagementPage() {
             setCreateError('')
           } catch (error) {
             setCreateError(error instanceof Error ? error.message : `Failed to ${modalMode === 'edit' ? 'update' : 'create'} class.`)
+            throw error
+          }
+        }}
+      />
+
+      <SectionCreateModal
+        open={isSectionModalOpen}
+        onOpenChange={setIsSectionModalOpen}
+        className={selectedClass?.name}
+        isSubmitting={createSectionMutation.isPending}
+        onSubmit={async (payload) => {
+          try {
+            await createSectionMutation.mutateAsync(payload)
+            setSectionError('')
+          } catch (error) {
+            setSectionError(error instanceof Error ? error.message : 'Failed to create section.')
             throw error
           }
         }}
