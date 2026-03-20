@@ -1,4 +1,5 @@
 import { SectionUpsertModal, type SectionFormPayload } from '@/components/modal/academics/SectionUpsertModal'
+import { ConfirmActionModal } from '@/components/modal/academics/ConfirmActionModal'
 import {
   useClassSectionsQuery,
   useCreateClassSectionMutation,
@@ -63,6 +64,8 @@ export function SectionManagementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [editingSection, setEditingSection] = useState<Section | null>(null)
+  const [sectionToDelete, setSectionToDelete] = useState<Section | null>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const { data: classSections = [], isLoading: isSectionsLoading, isError: isSectionsError } = useClassSectionsQuery()
   const { data: classes = [] } = useClassesQuery()
@@ -102,12 +105,19 @@ export function SectionManagementPage() {
     setIsModalOpen(true)
   }
 
-  const deleteSection = async (sectionId: number) => {
-    if (!window.confirm('Are you sure you want to delete this section?')) return
-    await deleteClassSectionMutation.mutateAsync({
-      classSectionId: sectionId,
-      deletedBy: 'WW',
-    })
+  const handleDeleteConfirm = async () => {
+    if (!sectionToDelete) return
+    try {
+      await deleteClassSectionMutation.mutateAsync({
+        classSectionId: sectionToDelete.classSectionId,
+        deletedBy: 'WW',
+      })
+      setSubmitError('')
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Failed to delete section.')
+    }
+    setSectionToDelete(null)
+    setIsDeleteModalOpen(false)
   }
 
   const handleSubmit = async (payload: SectionFormPayload) => {
@@ -299,14 +309,7 @@ export function SectionManagementPage() {
                             <Edit2 size={15} />
                           </button>
                           <button
-                            onClick={async () => {
-                              try {
-                                await deleteSection(sec.classSectionId)
-                                setSubmitError('')
-                              } catch (error) {
-                                setSubmitError(error instanceof Error ? error.message : 'Failed to delete section.')
-                              }
-                            }}
+                            onClick={() => { setSectionToDelete(sec); setIsDeleteModalOpen(true) }}
                             className="rounded-md p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-red-600"
                             aria-label={`Delete section ${sec.name}`}
                           >
@@ -322,6 +325,19 @@ export function SectionManagementPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmActionModal
+        open={isDeleteModalOpen}
+        onOpenChange={(open) => {
+          setIsDeleteModalOpen(open)
+          if (!open) setSectionToDelete(null)
+        }}
+        title="Delete Section"
+        description={`Are you sure you want to delete section ${sectionToDelete?.name ?? ''}?`}
+        confirmLabel={deleteClassSectionMutation.isPending ? 'Deleting...' : 'Delete'}
+        cancelLabel="Cancel"
+        onConfirm={handleDeleteConfirm}
+      />
 
       {isModalOpen ? (
         <SectionUpsertModal

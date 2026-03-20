@@ -5,7 +5,6 @@ import { AuthLayout } from '@/layouts/AuthLayout'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
 import { AcademicYearPage } from '@/pages/academics/AcademicYearPage'
 import { AcedmicCalendarPage } from '@/pages/academics/AcedmicCalendarPage'
-import { AcademicCalendarCreatePage } from '@/pages/academics/AcademicCalendarCreatePage'
 import { ClassManagementPage } from '@/pages/academics/ClassManagementPage'
 import { SectionManagementPage } from '@/pages/academics/SectionManagementPage'
 import { SubjectMasterPage } from '@/pages/academics/SubjectMasterPage'
@@ -62,7 +61,6 @@ export function AppRouter() {
             <Route path={ROUTES.dashboard} element={<DashboardPage />} />
             <Route path={ROUTES.academics} element={<AcademicYearPage />} />
             <Route path={ROUTES.acedmicCalendar} element={<AcedmicCalendarPage />} />
-            <Route path={ROUTES.academicCalendarCreate} element={<AcademicCalendarCreatePage />} />
             <Route path={ROUTES.classManagement} element={<ClassManagementPage />} />
             <Route path={ROUTES.sectionManagement} element={<SectionManagementPage />} />
             <Route path={ROUTES.subjectEntry} element={<SubjectMasterPage />} />

@@ -1,5 +1,4 @@
 import {
-  AlertCircle,
   ArrowLeft,
   Award,
   Book,
@@ -9,212 +8,91 @@ import {
   Edit,
   Filter,
   Plus,
-  Save,
   Trash2,
-  X,
 } from 'lucide-react'
-import axios from 'axios'
-import { useCreateSubjectMutation, useDeleteSubjectMutation, useSubjectsQuery, useUpdateSubjectMutation } from '@/hooks/useSubjectsMutation'
+import { useDeleteSubjectMutation, useSubjectsQuery } from '@/hooks/useSubjectsMutation'
+import { SubjectMasterModal } from '@/components/modal/academics/SubjectMasterModal'
+import { ConfirmActionModal } from '@/components/modal/academics/ConfirmActionModal'
 import type { SubjectCategory, SubjectRecord } from '@/services/subjects'
-import type { FormEvent } from 'react'
+import axios from 'axios'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-type SubjectType = 'Core' | 'Elective' | 'Language' | 'Skill' | 'Co-Curricular'
-type Subject = SubjectRecord
-
-type SubjectFormState = {
-  subjectCode: string
-  subjectName: string
-  subjectType: SubjectType
-  category: SubjectCategory
-  description: string
-  totalMarks: string
-  passingMarks: string
-}
-
-function normalizeSubjectType(value: string): SubjectType {
-  switch (value) {
-    case 'Core':
-    case 'Elective':
-    case 'Language':
-    case 'Skill':
-    case 'Co-Curricular':
-      return value
-    default:
-      return 'Core'
-  }
-}
-
-const initialFormState: SubjectFormState = {
-  subjectCode: '',
-  subjectName: '',
-  subjectType: 'Core',
-  category: 'Academic',
-  description: '',
-  totalMarks: '',
-  passingMarks: '',
-}
 
 function getApiErrorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
     const responseData = error.response?.data
-
-    if (typeof responseData === 'string' && responseData.trim()) {
-      return responseData
-    }
-
+    if (typeof responseData === 'string' && responseData.trim()) return responseData
     if (responseData && typeof responseData === 'object') {
       const message =
         ('message' in responseData && typeof responseData.message === 'string' && responseData.message) ||
         ('title' in responseData && typeof responseData.title === 'string' && responseData.title)
-
       if (message) return message
-
       if ('errors' in responseData && responseData.errors && typeof responseData.errors === 'object') {
         const firstError = Object.values(responseData.errors)
           .flatMap((value) => (Array.isArray(value) ? value : []))
           .find((value) => typeof value === 'string' && value.trim())
-
         if (typeof firstError === 'string') return firstError
       }
     }
   }
-
   return error instanceof Error ? error.message : fallback
+}
+
+const getTypeColor = (type: string) => {
+  switch (type) {
+    case 'Core': return 'bg-blue-100 text-blue-700 border-blue-200'
+    case 'Elective': return 'bg-purple-100 text-purple-700 border-purple-200'
+    case 'Language': return 'bg-green-100 text-green-700 border-green-200'
+    case 'Skill': return 'bg-orange-100 text-orange-700 border-orange-200'
+    case 'Co-Curricular': return 'bg-pink-100 text-pink-700 border-pink-200'
+    default: return 'bg-gray-100 text-gray-700 border-gray-200'
+  }
+}
+
+const getCategoryColor = (category: SubjectCategory | null) => {
+  if (category === 'Academic') return 'bg-indigo-100 text-indigo-700 border-indigo-200'
+  if (category === 'Non-Academic') return 'bg-rose-100 text-rose-700 border-rose-200'
+  return 'bg-gray-100 text-gray-700 border-gray-200'
 }
 
 export function SubjectMasterPage() {
   const navigate = useNavigate()
   const { data: subjects = [], isLoading, isError } = useSubjectsQuery()
-  const createSubjectMutation = useCreateSubjectMutation()
   const deleteSubjectMutation = useDeleteSubjectMutation()
-  const updateSubjectMutation = useUpdateSubjectMutation()
-  const [showAddForm, setShowAddForm] = useState(false)
+
+  const [showModal, setShowModal] = useState(false)
+  const [editingSubject, setEditingSubject] = useState<SubjectRecord | null>(null)
+  const [subjectToDelete, setSubjectToDelete] = useState<SubjectRecord | null>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState('all')
   const [filterCategory, setFilterCategory] = useState('all')
   const [showFilters, setShowFilters] = useState(false)
-  const [editingSubject, setEditingSubject] = useState<Subject | null>(null)
-  const [formData, setFormData] = useState<SubjectFormState>(initialFormState)
   const [submitError, setSubmitError] = useState('')
   const [submitSuccess, setSubmitSuccess] = useState('')
 
-  const resetForm = () => {
-    setFormData(initialFormState)
+  const openCreateModal = () => {
+    setEditingSubject(null)
+    setShowModal(true)
   }
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault()
-
-    const timestamp = new Date().toISOString()
-    const totalMarks = Number(formData.totalMarks)
-    const passingMarks = Number(formData.passingMarks)
-    const description = formData.description.trim()
-
-    if (!description) {
-      setSubmitSuccess('')
-      setSubmitError('Description is required.')
-      return
-    }
-
-    if (Number.isNaN(totalMarks) || totalMarks <= 0) {
-      setSubmitSuccess('')
-      setSubmitError('Total Marks must be greater than 0.')
-      return
-    }
-
-    if (Number.isNaN(passingMarks) || passingMarks < 0 || passingMarks > totalMarks) {
-      setSubmitSuccess('')
-      setSubmitError('Passing Marks must be between 0 and Total Marks.')
-      return
-    }
-
-    try {
-      if (editingSubject) {
-        await updateSubjectMutation.mutateAsync({
-          subjectId: Number(editingSubject.id),
-          subjectName: formData.subjectName.trim(),
-          subjectCode: formData.subjectCode.trim().toUpperCase(),
-          isOptional: formData.subjectType === 'Elective',
-          subjectType: formData.subjectType,
-          category: formData.category,
-          description,
-          minMarks: 0,
-          maxMarks: totalMarks,
-          passMarks: passingMarks,
-          authAdd: 'Admin',
-          authLstEdt: null,
-          authDel: null,
-          addOnDt: null,
-          editOnDt: null,
-          delOnDt: null,
-          delStatus: false,
-        })
-      } else {
-        await createSubjectMutation.mutateAsync({
-          subjectId: 0,
-          subjectName: formData.subjectName.trim(),
-          subjectCode: formData.subjectCode.trim().toUpperCase(),
-          isOptional: formData.subjectType === 'Elective',
-          subjectType: formData.subjectType,
-          category: formData.category,
-          description,
-          minMarks: 0,
-          maxMarks: totalMarks,
-          passMarks: passingMarks,
-          authAdd: 'Admin',
-          authLstEdt: null,
-          authDel: null,
-          addOnDt: timestamp,
-          editOnDt: null,
-          delOnDt: null,
-          delStatus: false,
-        })
-      }
-
-      setSubmitError('')
-      setSubmitSuccess(editingSubject ? 'Subject updated successfully.' : 'Subject created successfully.')
-      setShowAddForm(false)
-      setEditingSubject(null)
-      resetForm()
-    } catch (error) {
-      setSubmitSuccess('')
-      setSubmitError(getApiErrorMessage(error, 'Failed to save subject.'))
-    }
-  }
-
-  const handleEdit = (subject: Subject) => {
+  const openEditModal = (subject: SubjectRecord) => {
     setEditingSubject(subject)
-    setFormData({
-      subjectCode: subject.subjectCode,
-      subjectName: subject.subjectName,
-      subjectType: normalizeSubjectType(subject.subjectType),
-      category: subject.category ?? 'Academic',
-      description: subject.description,
-      totalMarks: String(subject.totalMarks),
-      passingMarks: String(subject.passingMarks),
-    })
-    setShowAddForm(true)
+    setShowModal(true)
   }
 
-  const handleDelete = async (subject: Subject) => {
-    if (!window.confirm(`Are you sure you want to delete ${subject.subjectName}?`)) return
-
+  const handleDeleteConfirm = async () => {
+    if (!subjectToDelete) return
     try {
-      await deleteSubjectMutation.mutateAsync(Number(subject.id))
+      await deleteSubjectMutation.mutateAsync(Number(subjectToDelete.id))
       setSubmitSuccess('Subject deleted successfully.')
       setSubmitError('')
-
-      if (editingSubject?.id === subject.id) {
-        setEditingSubject(null)
-        setShowAddForm(false)
-        resetForm()
-      }
     } catch (error) {
       setSubmitSuccess('')
       setSubmitError(getApiErrorMessage(error, 'Failed to delete subject.'))
     }
+    setSubjectToDelete(null)
+    setIsDeleteModalOpen(false)
   }
 
   const filteredSubjects = useMemo(() => {
@@ -225,7 +103,6 @@ export function SubjectMasterPage() {
         subject.subjectCode.toLowerCase().includes(normalizedSearch)
       const matchesType = filterType === 'all' || subject.subjectType === filterType
       const matchesCategory = filterCategory === 'all' || subject.category === filterCategory
-
       return matchesSearch && matchesType && matchesCategory
     })
   }, [filterCategory, filterType, searchTerm, subjects])
@@ -234,29 +111,6 @@ export function SubjectMasterPage() {
   const activeSubjects = subjects.filter((subject) => subject.isActive).length
   const academicSubjects = subjects.filter((subject) => subject.category === 'Academic').length
   const coreSubjects = subjects.filter((subject) => subject.subjectType === 'Core').length
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'Core':
-        return 'bg-blue-100 text-blue-700 border-blue-200'
-      case 'Elective':
-        return 'bg-purple-100 text-purple-700 border-purple-200'
-      case 'Language':
-        return 'bg-green-100 text-green-700 border-green-200'
-      case 'Skill':
-        return 'bg-orange-100 text-orange-700 border-orange-200'
-      case 'Co-Curricular':
-        return 'bg-pink-100 text-pink-700 border-pink-200'
-      default:
-        return 'bg-gray-100 text-gray-700 border-gray-200'
-    }
-  }
-
-  const getCategoryColor = (category: SubjectCategory | null) => {
-    if (category === 'Academic') return 'bg-indigo-100 text-indigo-700 border-indigo-200'
-    if (category === 'Non-Academic') return 'bg-rose-100 text-rose-700 border-rose-200'
-    return 'bg-gray-100 text-gray-700 border-gray-200'
-  }
 
   return (
     <div className="space-y-6">
@@ -272,11 +126,7 @@ export function SubjectMasterPage() {
             </div>
           </div>
           <button
-            onClick={() => {
-              resetForm()
-              setEditingSubject(null)
-              setShowAddForm(true)
-            }}
+            onClick={openCreateModal}
             className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-sm"
           >
             <Plus className="w-4 h-4" />
@@ -351,7 +201,6 @@ export function SubjectMasterPage() {
               className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
             />
           </div>
-
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="px-5 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-all flex items-center gap-2 text-sm"
@@ -378,7 +227,6 @@ export function SubjectMasterPage() {
                 <option value="Co-Curricular">Co-Curricular</option>
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
               <select
@@ -406,191 +254,6 @@ export function SubjectMasterPage() {
       {submitError ? <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">{submitError}</div> : null}
       {submitSuccess ? <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-700">{submitSuccess}</div> : null}
 
-      {showAddForm ? (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">{editingSubject ? 'Edit Subject' : 'Add New Subject'}</h2>
-                <button
-                  onClick={() => {
-                    setShowAddForm(false)
-                    setEditingSubject(null)
-                    resetForm()
-                  }}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-all"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Subject Code *</label>
-                  <input
-                    type="text"
-                    value={formData.subjectCode}
-                    onChange={(event) =>
-                      setFormData({
-                        ...formData,
-                        subjectCode: event.target.value.toUpperCase(),
-                      })
-                    }
-                    placeholder="e.g., ENG, MATH, SCI"
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors uppercase"
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Unique subject code</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Subject Name *</label>
-                  <input
-                    type="text"
-                    value={formData.subjectName}
-                    onChange={(event) =>
-                      setFormData({
-                        ...formData,
-                        subjectName: event.target.value,
-                      })
-                    }
-                    placeholder="e.g., Mathematics"
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Subject Type *</label>
-                  <select
-                    value={formData.subjectType}
-                    onChange={(event) =>
-                      setFormData({
-                        ...formData,
-                        subjectType: event.target.value as SubjectType,
-                      })
-                    }
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
-                    required
-                  >
-                    <option value="Core">Core</option>
-                    <option value="Elective">Elective</option>
-                    <option value="Language">Language</option>
-                    <option value="Skill">Skill</option>
-                    <option value="Co-Curricular">Co-Curricular</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Category *</label>
-                  <select
-                    value={formData.category}
-                    onChange={(event) =>
-                      setFormData({
-                        ...formData,
-                        category: event.target.value as SubjectCategory,
-                      })
-                    }
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
-                    required
-                  >
-                    <option value="Academic">Academic</option>
-                    <option value="Non-Academic">Non-Academic</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Description *</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(event) =>
-                    setFormData({
-                      ...formData,
-                      description: event.target.value,
-                    })
-                  }
-                  placeholder="Brief description of the subject..."
-                  rows={3}
-                  className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors resize-none"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Total Marks *</label>
-                  <input
-                    type="number"
-                    value={formData.totalMarks}
-                    onChange={(event) =>
-                      setFormData({
-                        ...formData,
-                        totalMarks: event.target.value,
-                      })
-                    }
-                    placeholder="e.g., 100"
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Passing Marks *</label>
-                  <input
-                    type="number"
-                    value={formData.passingMarks}
-                    onChange={(event) =>
-                      setFormData({
-                        ...formData,
-                        passingMarks: event.target.value,
-                      })
-                    }
-                    placeholder="e.g., 35"
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-800">
-                  <p className="font-semibold mb-1">Important Note:</p>
-                  <p>After creating a subject, you can map it to specific classes from the next academic setup step.</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  disabled={createSubjectMutation.isPending || updateSubjectMutation.isPending}
-                  className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
-                >
-                  <Save className="w-5 h-5" />
-                  {createSubjectMutation.isPending || updateSubjectMutation.isPending ? 'Saving...' : editingSubject ? 'Update Subject' : 'Save Subject'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAddForm(false)
-                    setEditingSubject(null)
-                    resetForm()
-                  }}
-                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
-
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -610,9 +273,7 @@ export function SubjectMasterPage() {
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-6 text-center text-sm text-gray-500">
-                    Loading subjects...
-                  </td>
+                  <td colSpan={9} className="px-6 py-6 text-center text-sm text-gray-500">Loading subjects...</td>
                 </tr>
               ) : null}
               {filteredSubjects.map((subject, index) => (
@@ -633,13 +294,7 @@ export function SubjectMasterPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold border ${
-                        subject.isOptional
-                          ? 'bg-amber-100 text-amber-700 border-amber-200'
-                          : 'bg-slate-100 text-slate-700 border-slate-200'
-                      }`}
-                    >
+                    <span className={`px-3 py-1 rounded-lg text-xs font-semibold border ${subject.isOptional ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
                       {subject.isOptional ? 'Yes' : 'No'}
                     </span>
                   </td>
@@ -660,24 +315,20 @@ export function SubjectMasterPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold border ${
-                        subject.isActive ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'
-                      }`}
-                    >
+                    <span className={`px-3 py-1 rounded-lg text-xs font-semibold border ${subject.isActive ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'}`}>
                       {subject.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => handleEdit(subject)}
+                        onClick={() => openEditModal(subject)}
                         className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-all"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => void handleDelete(subject)}
+                        onClick={() => { setSubjectToDelete(subject); setIsDeleteModalOpen(true) }}
                         disabled={deleteSubjectMutation.isPending}
                         className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all disabled:cursor-not-allowed disabled:opacity-60"
                       >
@@ -699,6 +350,32 @@ export function SubjectMasterPage() {
           <p className="text-gray-600">Try adjusting your search or filter criteria</p>
         </div>
       ) : null}
+
+      <ConfirmActionModal
+        open={isDeleteModalOpen}
+        onOpenChange={(open) => {
+          setIsDeleteModalOpen(open)
+          if (!open) setSubjectToDelete(null)
+        }}
+        title="Delete Subject"
+        description={`Are you sure you want to delete ${subjectToDelete?.subjectName ?? 'this subject'}?`}
+        confirmLabel={deleteSubjectMutation.isPending ? 'Deleting...' : 'Delete'}
+        cancelLabel="Cancel"
+        onConfirm={handleDeleteConfirm}
+      />
+
+      <SubjectMasterModal
+        open={showModal}
+        onOpenChange={(open) => {
+          setShowModal(open)
+          if (!open) setEditingSubject(null)
+        }}
+        editingSubject={editingSubject}
+        onSuccess={(message) => {
+          setSubmitSuccess(message)
+          setSubmitError('')
+        }}
+      />
     </div>
   )
 }

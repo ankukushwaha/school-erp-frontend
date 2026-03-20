@@ -3,7 +3,6 @@ export const ROUTES = {
   dashboard: '/dashboard',
   academics: '/academics/academic-year',
   acedmicCalendar: '/academics/acedmic-calendar',
-  academicCalendarCreate: '/academics/acedmic-calendar/new',
   classManagement: '/academics/classManagement',
   sectionManagement: '/academics/SectionManagement',
   subjectEntry: '/academics/subjectEntry',
