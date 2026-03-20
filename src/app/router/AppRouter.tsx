@@ -8,6 +8,7 @@ import { AcedmicCalendarPage } from '@/pages/academics/AcedmicCalendarPage'
 import { AcademicCalendarCreatePage } from '@/pages/academics/AcademicCalendarCreatePage'
 import { ClassManagementPage } from '@/pages/academics/ClassManagementPage'
 import { SectionManagementPage } from '@/pages/academics/SectionManagementPage'
+import { SubjectMasterPage } from '@/pages/academics/SubjectMasterPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
@@ -64,6 +65,7 @@ export function AppRouter() {
             <Route path={ROUTES.academicCalendarCreate} element={<AcademicCalendarCreatePage />} />
             <Route path={ROUTES.classManagement} element={<ClassManagementPage />} />
             <Route path={ROUTES.sectionManagement} element={<SectionManagementPage />} />
+            <Route path={ROUTES.subjectEntry} element={<SubjectMasterPage />} />
             <Route path={ROUTES.profile} element={<ProfilePage />} />
             <Route path={ROUTES.setting} element={<SettingsPage />} />
             {dynamicRoutePaths.map((path) => {

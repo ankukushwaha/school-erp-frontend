@@ -6,6 +6,7 @@ export const ROUTES = {
   academicCalendarCreate: '/academics/acedmic-calendar/new',
   classManagement: '/academics/classManagement',
   sectionManagement: '/academics/SectionManagement',
+  subjectEntry: '/academics/subjectEntry',
   students: '/students',
   fees: '/fees',
   setting: '/setting/SettingsPage',

@@ -4,6 +4,7 @@ import { AcedmicCalendarPage } from '@/pages/academics/AcedmicCalendarPage'
 import { AcademicCalendarCreatePage } from '@/pages/academics/AcademicCalendarCreatePage'
 import { ClassManagementPage } from '@/pages/academics/ClassManagementPage'
 import { SectionManagementPage } from '@/pages/academics/SectionManagementPage'
+import { SubjectMasterPage } from '@/pages/academics/SubjectMasterPage'
 import { AttendancePage } from '@/pages/attendance/AttendancePage'
 import { TemporaryModulePage } from '@/pages/common/TemporaryModulePage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
@@ -25,6 +26,7 @@ export const routeComponentMap: Record<string, ComponentType> = {
   '/academics/acedmic-calendar/new': AcademicCalendarCreatePage,
   '/academics/classManagement': ClassManagementPage,
   '/academics/sectionManagement': SectionManagementPage,
+  '/academics/subjectentry': SubjectMasterPage,
   '/attendance': AttendancePage,
   '/setting/SettingsPage': SettingsPage,
 }
