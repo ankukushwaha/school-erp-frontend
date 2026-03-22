@@ -15,6 +15,7 @@ import { AttendancePage } from '@/pages/attendance/AttendancePage'
 import { TemporaryModulePage } from '@/pages/common/TemporaryModulePage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
 import { StudentsPage } from '@/pages/student/StudentsPage'
+import { StudentEnquiryPage } from '@/pages/student/StudentEnquiryPage'
 
 function normalizeRoutePath(path: string): string {
   const trimmed = path.trim().toLowerCase()
@@ -27,6 +28,7 @@ export const routeComponentMap: Record<string, ComponentType> = {
   '/students/list': StudentsPage,
   '/students/diary': TemporaryModulePage,
   '/students/other-details': TemporaryModulePage,
+  '/student/enquiry': StudentEnquiryPage,
   '/academics/overview': AcademicsOverviewPage,
   '/academics/academic-year': AcademicYearPage,
   '/academics/calendar': AcedmicCalendarPage,

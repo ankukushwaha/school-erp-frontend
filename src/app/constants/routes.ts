@@ -14,6 +14,7 @@ export const ROUTES = {
   enquiryListPage: '/admission/enquiries-list',
   StudentRegistration: '/admission/student-registration',
   students: '/students',
+  studentEnquiry: '/student/enquiry',
   fees: '/fees',
   setting: '/setting/SettingsPage',
   attendance: '/attendance',
