@@ -6,6 +6,11 @@ import { ClassManagementPage } from '@/pages/academics/ClassManagementPage'
 import { SectionManagementPage } from '@/pages/academics/SectionManagementPage'
 import { SubjectMasterPage } from '@/pages/academics/SubjectMasterPage'
 import { SubjectMappingPage } from '@/pages/academics/SubjectMappingPage'
+import {AdmissionDashboard} from '@/pages/admission/AdmissionDashboard'
+import {AdmissionsOverviewPage} from '@/pages/admission/AdmissionOverview'
+import {EnquiryFormPage} from '@/pages/admission/EnquiryFormPage'
+import {EnquiryListPage} from '@/pages/admission/EnquiryListPage'
+import {StudentRegistrationFormPage} from '@/pages/admission/StudentRegistration'
 import { AttendancePage } from '@/pages/attendance/AttendancePage'
 import { TemporaryModulePage } from '@/pages/common/TemporaryModulePage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
@@ -29,6 +34,11 @@ export const routeComponentMap: Record<string, ComponentType> = {
   '/academics/sectionManagement': SectionManagementPage,
   '/academics/subjectentry': SubjectMasterPage,
   '/academics/subject-mapping': SubjectMappingPage,
+  '/admission/dashboard': AdmissionDashboard,
+  '/admission/overview': AdmissionsOverviewPage,
+  '/admission/enquiry-form': EnquiryFormPage,
+  '/admission/enquiries-list': EnquiryListPage,
+  '/admission/student-registration': StudentRegistrationFormPage,
   '/attendance': AttendancePage,
   '/setting/SettingsPage': SettingsPage,
 }
