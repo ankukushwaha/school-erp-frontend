@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const localBaseURL = 'https://localhost:7240/api'
+const localBaseURL = 'http://localhost:7240/api'
 const productionBaseURL = '/api'
 
 const baseURL = import.meta.env.DEV
