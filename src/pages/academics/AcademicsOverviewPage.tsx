@@ -76,6 +76,15 @@ const quickAccessCards = [
     title: 'Teacher Allocation',
     description: 'Assign class teachers to sections',
   },
+  {
+    to: '/academics/syllabus-management',
+    gradient: 'from-blue-500 to-indigo-600',
+    icon: BookMarked,
+    stat: '42',
+    statLabel: 'Subjects',
+    title: 'Syllabus Management',
+    description: 'Track curriculum progress and topics',
+  },
 ]
 
 const summaryStats = [

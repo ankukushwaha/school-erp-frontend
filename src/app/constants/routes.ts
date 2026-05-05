@@ -19,7 +19,8 @@ export const ROUTES = {
   setting: '/setting/SettingsPage',
   attendance: '/attendance',
   profile: '/profile',
-  classTeacherAllocation: '/academics/teacher-allocation',
+  teacherAllocation: '/academics/teacher-allocation',
+  syllabusManagement: '/academics/syllabus-management',
 } as const
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES]
