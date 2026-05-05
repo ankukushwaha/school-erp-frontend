@@ -10,6 +10,7 @@ import { ClassManagementPage } from '@/pages/academics/ClassManagementPage'
 import { SectionManagementPage } from '@/pages/academics/SectionManagementPage'
 import { SubjectMasterPage } from '@/pages/academics/SubjectMasterPage'
 import { SubjectMappingPage } from '@/pages/academics/SubjectMappingPage'
+import { ClassTeacherAllocationPage } from '@/pages/academics/ClassTeacherAllocationPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
@@ -47,7 +48,8 @@ export function AppRouter() {
         path !== ROUTES.setting &&
         path !== ROUTES.acedmicCalendar &&
         path !== ROUTES.classManagement &&
-        path !== ROUTES.sectionManagement 
+        path !== ROUTES.sectionManagement &&
+        path !== ROUTES.classTeacherAllocation
     )
   }, [menuItems])
 
@@ -61,6 +63,7 @@ export function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path={ROUTES.dashboard} element={<DashboardPage />} />
+            <Route path={ROUTES.classTeacherAllocation} element={<ClassTeacherAllocationPage />} />
             <Route path={ROUTES.academicsOverview} element={<AcademicsOverviewPage />} />
             <Route path={ROUTES.academics} element={<AcademicYearPage />} />
             <Route path={ROUTES.acedmicCalendar} element={<AcedmicCalendarPage />} />
@@ -68,6 +71,7 @@ export function AppRouter() {
             <Route path={ROUTES.sectionManagement} element={<SectionManagementPage />} />
             <Route path={ROUTES.subjectEntry} element={<SubjectMasterPage />} />
             <Route path={ROUTES.subjectMapping} element={<SubjectMappingPage />} />
+            <Route path={ROUTES.classTeacherAllocation} element={<ClassTeacherAllocationPage />} />
             <Route path={ROUTES.profile} element={<ProfilePage />} />
             <Route path={ROUTES.setting} element={<SettingsPage />} />
             {dynamicRoutePaths.map((path) => {

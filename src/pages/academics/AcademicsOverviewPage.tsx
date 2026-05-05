@@ -67,6 +67,15 @@ const quickAccessCards = [
     title: 'Timetable Management',
     description: 'Create and manage class schedules',
   },
+  {
+    to: '/academics/teacher-allocation',
+    gradient: 'from-violet-500 to-indigo-600',
+    icon: GraduationCap,
+    stat: '15',
+    statLabel: 'Teachers',
+    title: 'Teacher Allocation',
+    description: 'Assign class teachers to sections',
+  },
 ]
 
 const summaryStats = [

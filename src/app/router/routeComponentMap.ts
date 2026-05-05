@@ -6,6 +6,7 @@ import { ClassManagementPage } from '@/pages/academics/ClassManagementPage'
 import { SectionManagementPage } from '@/pages/academics/SectionManagementPage'
 import { SubjectMasterPage } from '@/pages/academics/SubjectMasterPage'
 import { SubjectMappingPage } from '@/pages/academics/SubjectMappingPage'
+import { ClassTeacherAllocationPage } from '@/pages/academics/ClassTeacherAllocationPage'
 import {AdmissionDashboard} from '@/pages/admission/AdmissionDashboard'
 import {AdmissionsOverviewPage} from '@/pages/admission/AdmissionOverview'
 import {EnquiryFormPage} from '@/pages/admission/EnquiryFormPage'
@@ -43,6 +44,7 @@ export const routeComponentMap: Record<string, ComponentType> = {
   '/admission/student-registration': StudentRegistrationFormPage,
   '/attendance': AttendancePage,
   '/setting/SettingsPage': SettingsPage,
+  '/academics/teacher-allocation': ClassTeacherAllocationPage,
 }
 
 export function getComponentForRoute(path: string): ComponentType {
