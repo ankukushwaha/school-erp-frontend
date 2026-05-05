@@ -8,11 +8,12 @@ import { SubjectMasterPage } from '@/pages/academics/SubjectMasterPage'
 import { SubjectMappingPage } from '@/pages/academics/SubjectMappingPage'
 import { ClassTeacherAllocationPage } from '@/pages/academics/ClassTeacherAllocationPage'
 import { SyllabusManagementPage } from '@/pages/academics/SyllabusManagementPage'
-import {AdmissionDashboard} from '@/pages/admission/AdmissionDashboard'
-import {AdmissionsOverviewPage} from '@/pages/admission/AdmissionOverview'
-import {EnquiryFormPage} from '@/pages/admission/EnquiryFormPage'
-import {EnquiryListPage} from '@/pages/admission/EnquiryListPage'
-import {StudentRegistrationFormPage} from '@/pages/admission/StudentRegistration'
+import { LessonPlanPage } from '@/pages/academics/LessonPlanPage'
+import { AdmissionDashboard } from '@/pages/admission/AdmissionDashboard'
+import { AdmissionsOverviewPage } from '@/pages/admission/AdmissionOverview'
+import { EnquiryFormPage } from '@/pages/admission/EnquiryFormPage'
+import { EnquiryListPage } from '@/pages/admission/EnquiryListPage'
+import { StudentRegistrationFormPage } from '@/pages/admission/StudentRegistration'
 import { AttendancePage } from '@/pages/attendance/AttendancePage'
 import { TemporaryModulePage } from '@/pages/common/TemporaryModulePage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
@@ -47,6 +48,7 @@ export const routeComponentMap: Record<string, ComponentType> = {
   '/setting/SettingsPage': SettingsPage,
   '/academics/teacher-allocation': ClassTeacherAllocationPage,
   '/academics/syllabus-management': SyllabusManagementPage,
+  '/academics/lesson-plans': LessonPlanPage,
 }
 
 export function getComponentForRoute(path: string): ComponentType {

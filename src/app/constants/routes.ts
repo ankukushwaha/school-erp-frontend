@@ -21,6 +21,7 @@ export const ROUTES = {
   profile: '/profile',
   teacherAllocation: '/academics/teacher-allocation',
   syllabusManagement: '/academics/syllabus-management',
+  lessonPlan: '/academics/lesson-plans',
 } as const
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES]

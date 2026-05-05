@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Award,
   BookMarked,
+  Clipboard,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -84,6 +85,15 @@ const quickAccessCards = [
     statLabel: 'Subjects',
     title: 'Syllabus Management',
     description: 'Track curriculum progress and topics',
+  },
+  {
+    to: '/academics/lesson-plan',
+    gradient: 'from-amber-500 to-orange-600',
+    icon: Clipboard,
+    stat: '12',
+    statLabel: 'Active',
+    title: 'Lesson Plans',
+    description: 'Create and track daily teaching strategies',
   },
 ]
 
