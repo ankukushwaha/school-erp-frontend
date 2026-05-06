@@ -12,6 +12,7 @@ import {
   Clipboard,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { ROUTES } from '@/app/constants/routes'
 
 const quickAccessCards = [
   {
@@ -60,7 +61,7 @@ const quickAccessCards = [
     description: 'View and manage academic events',
   },
   {
-    to: '/academics/timetable',
+    to: ROUTES.timetableManagement,
     gradient: 'from-pink-500 to-rose-600',
     icon: Clock,
     stat: '15',
