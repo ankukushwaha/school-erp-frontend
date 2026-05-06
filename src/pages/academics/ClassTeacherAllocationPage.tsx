@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ArrowLeft,
   GraduationCap,
@@ -11,55 +11,71 @@ import {
   Mail,
   Phone,
   CheckCircle2,
+  Loader2,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { TeacherAllocationModal } from '@/components/modal/academics/TeacherAllocationModal';
-
-interface TeacherAllocation {
-  id: number;
-  teacherId: number;
-  teacherName: string;
-  email: string;
-  phone: string;
-  classId: number;
-  className: string;
-  sectionId: number;
-  sectionName: string;
-  subjects: string[];
-  studentCount: number;
-}
-
-const mockAllocations: TeacherAllocation[] = [
-  { id: 1, teacherId: 101, teacherName: 'Mrs. Sarah Johnson', email: 'sarah.j@school.com', phone: '+1 234-567-8901', classId: 1, className: 'Class 1', sectionId: 1, sectionName: 'A', subjects: ['Mathematics', 'English'], studentCount: 28 },
-  { id: 2, teacherId: 102, teacherName: 'Mr. Robert Williams', email: 'robert.w@school.com', phone: '+1 234-567-8902', classId: 1, className: 'Class 1', sectionId: 2, sectionName: 'B', subjects: ['Science', 'Social Studies'], studentCount: 29 },
-  { id: 3, teacherId: 103, teacherName: 'Ms. Emily Brown', email: 'emily.b@school.com', phone: '+1 234-567-8903', classId: 2, className: 'Class 2', sectionId: 3, sectionName: 'A', subjects: ['Mathematics', 'Science'], studentCount: 27 },
-  { id: 4, teacherId: 104, teacherName: 'Dr. Michael Davis', email: 'michael.d@school.com', phone: '+1 234-567-8904', classId: 10, className: 'Class 10', sectionId: 7, sectionName: 'A', subjects: ['Mathematics', 'Physics'], studentCount: 32 },
-  { id: 5, teacherId: 105, teacherName: 'Mrs. Jennifer Wilson', email: 'jennifer.w@school.com', phone: '+1 234-567-8905', classId: 10, className: 'Class 10', sectionId: 8, sectionName: 'B', subjects: ['Chemistry', 'Biology'], studentCount: 35 },
-];
-
-const mockTeachers = [
-  { id: 101, name: 'Mrs. Sarah Johnson', email: 'sarah.j@school.com', phone: '+1 234-567-8901' },
-  { id: 102, name: 'Mr. Robert Williams', email: 'robert.w@school.com', phone: '+1 234-567-8902' },
-  { id: 103, name: 'Ms. Emily Brown', email: 'emily.b@school.com', phone: '+1 234-567-8903' },
-  { id: 104, name: 'Dr. Michael Davis', email: 'michael.d@school.com', phone: '+1 234-567-8904' },
-  { id: 105, name: 'Mrs. Jennifer Wilson', email: 'jennifer.w@school.com', phone: '+1 234-567-8905' },
-  { id: 106, name: 'Mr. James Taylor', email: 'james.t@school.com', phone: '+1 234-567-8906' },
-];
-
-const mockClasses = [
-  { id: 1, name: 'Class 1', sections: ['A', 'B', 'C'] },
-  { id: 2, name: 'Class 2', sections: ['A', 'B', 'C'] },
-  { id: 10, name: 'Class 10', sections: ['A', 'B', 'C'] },
-];
+import {
+  getClassTeacherAllocations,
+  createClassTeacherAllocation,
+  updateClassTeacherAllocation,
+  deleteClassTeacherAllocation,
+  type ClassTeacherAllocation
+} from '@/services/classTeacherAllocation';
+import { getClasses, type SchoolClass } from '@/services/classes';
+import { getClassSections, type ClassSection } from '@/services/classSections';
+import { getAcademicYears } from '@/services/academicYears';
+import { getCommonSearchResults } from '@/services/commonSearch';
+import { COMMON_SEARCH_CONFIGS } from '@/app/constants/commonSearchConfigs';
+import { toast } from 'sonner';
 
 export const ClassTeacherAllocationPage = () => {
   const navigate = useNavigate();
-  const [allocations, setAllocations] = useState(mockAllocations);
+  const [allocations, setAllocations] = useState<ClassTeacherAllocation[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [classes, setClasses] = useState<SchoolClass[]>([]);
+  const [classSections, setClassSections] = useState<ClassSection[]>([]);
+  const [academicYears, setAcademicYears] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingAllocation, setEditingAllocation] = useState<TeacherAllocation | null>(null);
+  const [editingAllocation, setEditingAllocation] = useState<ClassTeacherAllocation | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleOpenModal = (alloc: TeacherAllocation | null = null) => {
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [allocData, teacherItems, classData, sectionData, ayData] = await Promise.all([
+        getClassTeacherAllocations(),
+        getCommonSearchResults({ ...COMMON_SEARCH_CONFIGS.teacherName, searchTerm: '' }),
+        getClasses(),
+        getClassSections(),
+        getAcademicYears()
+      ]);
+
+      const teacherList = teacherItems.map(item => ({
+        id: item.id,
+        fullName: item.label,
+        ...item.raw
+      }));
+
+      setAllocations(allocData);
+      setTeachers(teacherList);
+      setClasses(classData);
+      setClassSections(sectionData);
+      setAcademicYears(ayData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast.error('Failed to load allocation data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleOpenModal = (alloc: ClassTeacherAllocation | null = null) => {
     setEditingAllocation(alloc);
     setIsModalOpen(true);
   };
@@ -69,48 +85,46 @@ export const ClassTeacherAllocationPage = () => {
     setIsModalOpen(false);
   };
 
-  const handleSave = (data: any) => {
-    const teacher = mockTeachers.find(t => t.id === data.teacherId);
-    const classInfo = mockClasses.find(c => c.id === data.classId);
-
-    if (editingAllocation) {
-      setAllocations(allocations.map(alloc =>
-        alloc.id === editingAllocation.id
-          ? {
-            ...alloc,
-            teacherId: data.teacherId,
-            teacherName: teacher?.name || '',
-            email: teacher?.email || '',
-            phone: teacher?.phone || '',
-            classId: data.classId,
-            className: classInfo?.name || '',
-            sectionName: data.sectionName,
-            subjects: data.subjects
-          }
-          : alloc
-      ));
-    } else {
-      const newAllocation: TeacherAllocation = {
-        id: Date.now(),
-        teacherId: data.teacherId,
-        teacherName: teacher?.name || '',
-        email: teacher?.email || '',
-        phone: teacher?.phone || '',
+  const handleSave = async (data: any) => {
+    try {
+      const currentAY = academicYears.find(ay => ay.isCurrent) || academicYears[0];
+      const payload = {
+        academicYearId: currentAY?.academicYearId || 1,
+        schoolId: 1, // Defaulting to 1 for now
         classId: data.classId,
-        className: classInfo?.name || '',
-        sectionId: Date.now(),
-        sectionName: data.sectionName,
-        subjects: data.subjects,
-        studentCount: 0
+        sectionId: data.sectionId,
+        teacherId: data.teacherId,
+        isActive: true,
       };
-      setAllocations([...allocations, newAllocation]);
+
+      if (editingAllocation) {
+        await updateClassTeacherAllocation(editingAllocation.id, {
+          ...payload,
+          classTeacherId: editingAllocation.id
+        });
+        toast.success('Allocation updated successfully');
+      } else {
+        await createClassTeacherAllocation(payload);
+        toast.success('Teacher allocated successfully');
+      }
+      fetchData();
+      handleCloseModal();
+    } catch (error) {
+      console.error('Error saving allocation:', error);
+      toast.error('Failed to save allocation');
     }
-    handleCloseModal();
   };
 
-  const deleteAllocation = (id: number) => {
+  const deleteAllocation = async (id: number) => {
     if (confirm('Are you sure you want to remove this class teacher allocation?')) {
-      setAllocations(allocations.filter(alloc => alloc.id !== id));
+      try {
+        await deleteClassTeacherAllocation(id, 'ADMIN');
+        toast.success('Allocation removed successfully');
+        fetchData();
+      } catch (error) {
+        console.error('Error deleting allocation:', error);
+        toast.error('Failed to remove allocation');
+      }
     }
   };
 
@@ -119,6 +133,15 @@ export const ClassTeacherAllocationPage = () => {
     alloc.className.toLowerCase().includes(searchTerm.toLowerCase()) ||
     alloc.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+        <p className="text-gray-500 font-medium">Loading allocations...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -286,8 +309,9 @@ export const ClassTeacherAllocationPage = () => {
         onClose={handleCloseModal}
         onSave={handleSave}
         editingAllocation={editingAllocation}
-        teachers={mockTeachers}
-        classes={mockClasses}
+        teachers={teachers}
+        classes={classes}
+        classSections={classSections}
       />
     </div>
   );

@@ -1,33 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  X, 
-  GraduationCap, 
-  BookOpen, 
-  Save, 
-  ChevronDown 
+import {
+  X,
+  GraduationCap,
+  Save
 } from 'lucide-react';
+import { CommonSearchTextbox } from '@/components/common/CommonSearchTextbox';
+import { COMMON_SEARCH_CONFIGS } from '@/app/constants/commonSearchConfigs';
+import type { CommonSearchItem } from '@/services/commonSearch';
 
-interface TeacherAllocation {
-  id: number;
-  teacherId: number;
-  teacherName: string;
-  email: string;
-  phone: string;
-  classId: number;
-  className: string;
-  sectionId: number;
-  sectionName: string;
-  subjects: string[];
-  studentCount: number;
-}
 
 interface TeacherAllocationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (allocationData: any) => void;
-  editingAllocation: TeacherAllocation | null;
+  editingAllocation: any | null;
   teachers: any[];
   classes: any[];
+  classSections: any[];
 }
 
 export const TeacherAllocationModal: React.FC<TeacherAllocationModalProps> = ({
@@ -35,24 +24,37 @@ export const TeacherAllocationModal: React.FC<TeacherAllocationModalProps> = ({
   onClose,
   onSave,
   editingAllocation,
-  teachers,
-  classes
 }) => {
   const [selectedTeacherId, setSelectedTeacherId] = useState('');
+  const [teacherName, setTeacherName] = useState('');
+
   const [selectedClassId, setSelectedClassId] = useState('');
-  const [selectedSection, setSelectedSection] = useState('');
+  const [className, setClassName] = useState('');
+
+  const [selectedSectionId, setSelectedSectionId] = useState('');
+  const [sectionName, setSectionName] = useState('');
+
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
 
   useEffect(() => {
     if (editingAllocation) {
       setSelectedTeacherId(editingAllocation.teacherId.toString());
+      setTeacherName(editingAllocation.teacherName || '');
+
       setSelectedClassId(editingAllocation.classId.toString());
-      setSelectedSection(editingAllocation.sectionName);
-      setSelectedSubjects(editingAllocation.subjects);
+      setClassName(editingAllocation.className || '');
+
+      setSelectedSectionId(editingAllocation.sectionId.toString());
+      setSectionName(editingAllocation.sectionName || '');
+
+      setSelectedSubjects(editingAllocation.subjects || []);
     } else {
       setSelectedTeacherId('');
+      setTeacherName('');
       setSelectedClassId('');
-      setSelectedSection('');
+      setClassName('');
+      setSelectedSectionId('');
+      setSectionName('');
       setSelectedSubjects([]);
     }
   }, [editingAllocation, isOpen]);
@@ -64,107 +66,104 @@ export const TeacherAllocationModal: React.FC<TeacherAllocationModalProps> = ({
     onSave({
       teacherId: parseInt(selectedTeacherId),
       classId: parseInt(selectedClassId),
-      sectionName: selectedSection,
+      sectionId: parseInt(selectedSectionId),
       subjects: selectedSubjects
     });
   };
 
-  const availableSections = selectedClassId 
-    ? classes.find(c => c.id === parseInt(selectedClassId))?.sections || []
-    : [];
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div 
+      <div
         className="w-full lg:w-[480px] bg-white rounded-3xl border border-white/20 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
-              <GraduationCap size={20} />
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                <GraduationCap size={24} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">{editingAllocation ? 'Edit Allocation' : 'New Allocation'}</h2>
+                <p className="text-xs text-gray-100 opacity-80">Set responsibilities for the academic term</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-gray-800">
-                {editingAllocation ? 'Edit Allocation' : 'Allocate Class Teacher'}
-              </h3>
-              <p className="text-xs text-gray-500">Set responsibilities for the academic term</p>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-white/10 rounded-full transition-all"
+            >
+              <X size={20} />
+            </button>
           </div>
-          <button 
-            onClick={onClose} 
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
-          >
-            <X size={20} />
-          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="space-y-2">
             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
               Select Teacher <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <select 
-                value={selectedTeacherId}
-                onChange={(e) => setSelectedTeacherId(e.target.value)}
-                className="appearance-none w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700 transition-all cursor-pointer"
-                required
-              >
-                <option value="">Select Teacher</option>
-                {teachers.map(teacher => (
-                  <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
-                ))}
-              </select>
-              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
+            <CommonSearchTextbox
+              searchConfig={COMMON_SEARCH_CONFIGS.teacherName}
+              value={teacherName}
+              onChange={(val) => {
+                setTeacherName(val);
+                if (!val) setSelectedTeacherId('');
+              }}
+              onSelect={(item: CommonSearchItem) => {
+                setSelectedTeacherId(item.id.toString());
+                setTeacherName(item.label);
+              }}
+              placeholder="Search teacher by name or code..."
+              required
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Select Class <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <select 
-                  value={selectedClassId}
-                  onChange={(e) => {
-                    setSelectedClassId(e.target.value);
-                    setSelectedSection('');
-                  }}
-                  className="appearance-none w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700 transition-all cursor-pointer"
-                  required
-                >
-                  <option value="">Select Class</option>
-                  {classes.map(cls => (
-                    <option key={cls.id} value={cls.id}>{cls.name}</option>
-                  ))}
-                </select>
-                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
+              <CommonSearchTextbox
+                searchConfig={COMMON_SEARCH_CONFIGS.className}
+                value={className}
+                onChange={(val) => {
+                  setClassName(val);
+                  if (!val) {
+                    setSelectedClassId('');
+                    setSelectedSectionId('');
+                    setSectionName('');
+                  }
+                }}
+                onSelect={(item: CommonSearchItem) => {
+                  setSelectedClassId(item.id.toString());
+                  setClassName(item.label);
+                  // Reset section when class changes
+                  setSelectedSectionId('');
+                  setSectionName('');
+                }}
+                placeholder="Search class..."
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Select Section <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <select 
-                  value={selectedSection}
-                  onChange={(e) => setSelectedSection(e.target.value)}
-                  className="appearance-none w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700 transition-all cursor-pointer disabled:opacity-50"
-                  required
-                  disabled={!selectedClassId}
-                >
-                  <option value="">Select Section</option>
-                  {availableSections.map((section: string) => (
-                    <option key={section} value={section}>{section}</option>
-                  ))}
-                </select>
-                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
+              <CommonSearchTextbox
+                searchConfig={COMMON_SEARCH_CONFIGS.sectionName}
+                value={sectionName}
+                onChange={(val) => {
+                  setSectionName(val);
+                  if (!val) setSelectedSectionId('');
+                }}
+                onSelect={(item: CommonSearchItem) => {
+                  setSelectedSectionId(item.id.toString());
+                  setSectionName(item.label);
+                }}
+                placeholder="Search section..."
+                required
+              />
             </div>
           </div>
 
@@ -176,8 +175,8 @@ export const TeacherAllocationModal: React.FC<TeacherAllocationModalProps> = ({
               <div className="grid grid-cols-2 gap-3">
                 {['Mathematics', 'Science', 'English', 'Social Studies', 'Hindi', 'Computer', 'Art'].map(subject => (
                   <label key={subject} className="flex items-center gap-2 cursor-pointer group">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={selectedSubjects.includes(subject)}
                       onChange={(e) => {
                         if (e.target.checked) {
@@ -196,15 +195,15 @@ export const TeacherAllocationModal: React.FC<TeacherAllocationModalProps> = ({
           </div>
 
           <div className="pt-4 flex gap-4">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={onClose}
               className="flex-1 py-3 bg-white border border-gray-200 rounded-2xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-95"
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-sm font-bold shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 active:scale-95"
             >
               <Save size={18} />
