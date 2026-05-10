@@ -1,67 +1,59 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  X, 
-  BookMarked, 
-  BookOpen, 
-  Save, 
-  ChevronDown,
+import {
+  X,
+  BookMarked,
+  Save,
   Upload,
-  FileText,
-  Clock
+  FileText
 } from 'lucide-react';
+import { CommonSearchTextbox } from '@/components/common/CommonSearchTextbox';
+import { COMMON_SEARCH_CONFIGS } from '@/app/constants/commonSearchConfigs';
+import type { CommonSearchItem } from '@/services/commonSearch';
+import type { SyllabusItem } from '@/services/syllabus';
 
-interface SyllabusItem {
-  id: number;
-  subjectId: number;
-  subjectName: string;
-  classId: number;
-  className: string;
-  term: string;
-  totalTopics: number;
-  completedTopics: number;
-  status: 'On Track' | 'Behind' | 'Completed';
-  lastUpdated: string;
-  document?: string;
-}
+
 
 interface SyllabusManagementModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (syllabusData: any) => void;
   editingItem: SyllabusItem | null;
-  classes: any[];
-  subjects: any[];
-  terms: string[];
 }
 
 export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  editingItem,
-  classes,
-  subjects,
-  terms
+  editingItem
 }) => {
   const [selectedClassId, setSelectedClassId] = useState('');
+  const [className, setClassName] = useState('');
   const [selectedSubjectId, setSelectedSubjectId] = useState('');
+  const [subjectName, setSubjectName] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('');
+  const [academicYear, setAcademicYear] = useState('');
   const [totalTopics, setTotalTopics] = useState('');
   const [completedTopics, setCompletedTopics] = useState('');
   const [document, setDocument] = useState('');
 
   useEffect(() => {
     if (editingItem) {
-      setSelectedClassId(editingItem.classId.toString());
-      setSelectedSubjectId(editingItem.subjectId.toString());
-      setSelectedTerm(editingItem.term);
-      setTotalTopics(editingItem.totalTopics.toString());
-      setCompletedTopics(editingItem.completedTopics.toString());
+      setSelectedClassId(editingItem.classId?.toString() || '');
+      setClassName(editingItem.className || '');
+      setSelectedSubjectId(editingItem.subjectId?.toString() || '');
+      setSubjectName(editingItem.subjectName || '');
+      setSelectedTerm(editingItem.term || '');
+      setAcademicYear(editingItem.academicYear || '');
+      setTotalTopics(editingItem.totalTopics?.toString() || '');
+      setCompletedTopics(editingItem.completedTopics?.toString() || '');
       setDocument(editingItem.document || '');
     } else {
       setSelectedClassId('');
+      setClassName('');
       setSelectedSubjectId('');
+      setSubjectName('');
       setSelectedTerm('');
+      setAcademicYear('');
       setTotalTopics('');
       setCompletedTopics('');
       setDocument('');
@@ -76,6 +68,7 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
       classId: parseInt(selectedClassId),
       subjectId: parseInt(selectedSubjectId),
       term: selectedTerm,
+      academicYear,
       totalTopics: parseInt(totalTopics),
       completedTopics: parseInt(completedTopics),
       document
@@ -84,7 +77,7 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div 
+      <div
         className="w-full lg:w-[480px] bg-white rounded-3xl border border-white/20 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
@@ -100,8 +93,8 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
               <p className="text-xs text-gray-500">Define curriculum progress and topics</p>
             </div>
           </div>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
           >
             <X size={20} />
@@ -112,65 +105,72 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Select Class <span className="text-red-500">*</span>
+                Academic Year <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <select 
-                  value={selectedClassId}
-                  onChange={(e) => setSelectedClassId(e.target.value)}
-                  className="appearance-none w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700 transition-all cursor-pointer"
-                  required
-                >
-                  <option value="">Select Class</option>
-                  {classes.map(cls => (
-                    <option key={cls.id} value={cls.id}>{cls.name}</option>
-                  ))}
-                </select>
-                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
+              <CommonSearchTextbox
+                searchConfig={COMMON_SEARCH_CONFIGS.academicYear}
+                value={academicYear}
+                onChange={(val) => setAcademicYear(val)}
+                onSelect={(item: CommonSearchItem) => setAcademicYear(item.label)}
+                placeholder="Search year..."
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Term <span className="text-red-500">*</span>
+                Select Class <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <select 
-                  value={selectedTerm}
-                  onChange={(e) => setSelectedTerm(e.target.value)}
-                  className="appearance-none w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700 transition-all cursor-pointer"
-                  required
-                >
-                  <option value="">Select Term</option>
-                  {terms.map(term => (
-                    <option key={term} value={term}>{term}</option>
-                  ))}
-                </select>
-                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
+              <CommonSearchTextbox
+                searchConfig={COMMON_SEARCH_CONFIGS.className}
+                value={className}
+                onChange={(val) => {
+                  setClassName(val);
+                  if (!val) setSelectedClassId('');
+                }}
+                onSelect={(item: CommonSearchItem) => {
+                  setSelectedClassId(item.id.toString());
+                  setClassName(item.label);
+                }}
+                placeholder="Search class..."
+                required
+              />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-              Select Subject <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <BookMarked className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <select 
-                value={selectedSubjectId}
-                onChange={(e) => setSelectedSubjectId(e.target.value)}
-                className="appearance-none w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700 transition-all cursor-pointer"
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Term <span className="text-red-500">*</span>
+              </label>
+              <CommonSearchTextbox
+                searchConfig={COMMON_SEARCH_CONFIGS.termName}
+                value={selectedTerm}
+                onChange={(val) => setSelectedTerm(val)}
+                onSelect={(item: CommonSearchItem) => setSelectedTerm(item.label)}
+                placeholder="Search term..."
                 required
-              >
-                <option value="">Select Subject</option>
-                {subjects.map(subject => (
-                  <option key={subject.id} value={subject.id}>{subject.name}</option>
-                ))}
-              </select>
-              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Select Subject <span className="text-red-500">*</span>
+              </label>
+              <CommonSearchTextbox
+                searchConfig={COMMON_SEARCH_CONFIGS.subjectName}
+                value={subjectName}
+                onChange={(val) => {
+                  setSubjectName(val);
+                  if (!val) setSelectedSubjectId('');
+                }}
+                onSelect={(item: CommonSearchItem) => {
+                  setSelectedSubjectId(item.id.toString());
+                  setSubjectName(item.label);
+                }}
+                placeholder="Search subject..."
+                required
+              />
             </div>
           </div>
 
@@ -179,26 +179,26 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Total Topics <span className="text-red-500">*</span>
               </label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 value={totalTopics}
                 onChange={(e) => setTotalTopics(e.target.value)}
-                placeholder="15" 
+                placeholder="15"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700 transition-all"
-                required 
+                required
               />
             </div>
             <div className="space-y-2">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Completed Topics <span className="text-red-500">*</span>
               </label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 value={completedTopics}
                 onChange={(e) => setCompletedTopics(e.target.value)}
-                placeholder="10" 
+                placeholder="10"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700 transition-all"
-                required 
+                required
               />
             </div>
           </div>
@@ -210,15 +210,15 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <FileText className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={document}
                   onChange={(e) => setDocument(e.target.value)}
-                  placeholder="curriculum_v1.pdf" 
+                  placeholder="curriculum_v1.pdf"
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700 transition-all"
                 />
               </div>
-              <button 
+              <button
                 type="button"
                 className="w-12 h-12 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-all active:scale-95"
               >
@@ -228,15 +228,15 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
           </div>
 
           <div className="pt-4 flex gap-4">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={onClose}
               className="flex-1 py-3 bg-white border border-gray-200 rounded-2xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-95"
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-sm font-bold shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 active:scale-95"
             >
               <Save size={18} />

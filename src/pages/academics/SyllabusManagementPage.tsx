@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { getSyllabusList, createSyllabus, updateSyllabus, deleteSyllabus, type SyllabusItem } from '@/services/syllabus';
 import {
   ArrowLeft,
   BookMarked,
@@ -7,7 +9,6 @@ import {
   Trash2,
   FileText,
   Search,
-  ChevronDown,
   Download,
   CheckCircle2,
   Clock,
@@ -15,58 +16,48 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SyllabusManagementModal } from '@/components/modal/academics/SyllabusManagementModal';
+import { ConfirmActionModal } from '@/components/modal/academics/ConfirmActionModal';
+import { CommonSearchTextbox } from '@/components/common/CommonSearchTextbox';
+import { COMMON_SEARCH_CONFIGS } from '@/app/constants/commonSearchConfigs';
+import type { CommonSearchItem } from '@/services/commonSearch';
 
-interface SyllabusItem {
-  id: number;
-  subjectId: number;
-  subjectName: string;
-  classId: number;
-  className: string;
-  term: string;
-  totalTopics: number;
-  completedTopics: number;
-  status: 'On Track' | 'Behind' | 'Completed';
-  lastUpdated: string;
-  document?: string;
-}
-
-const mockSyllabus: SyllabusItem[] = [
-  { id: 1, subjectId: 1, subjectName: 'Mathematics', classId: 10, className: 'Class 10', term: 'Term 1', totalTopics: 15, completedTopics: 14, status: 'On Track', lastUpdated: '2024-02-05', document: 'math_syllabus.pdf' },
-  { id: 2, subjectId: 2, subjectName: 'Science', classId: 10, className: 'Class 10', term: 'Term 1', totalTopics: 18, completedTopics: 18, status: 'Completed', lastUpdated: '2024-02-03', document: 'science_syllabus.pdf' },
-  { id: 3, subjectId: 3, subjectName: 'English', classId: 10, className: 'Class 10', term: 'Term 1', totalTopics: 12, completedTopics: 10, status: 'On Track', lastUpdated: '2024-02-04', document: 'english_syllabus.pdf' },
-  { id: 4, subjectId: 4, subjectName: 'Social Science', classId: 10, className: 'Class 10', term: 'Term 1', totalTopics: 20, completedTopics: 15, status: 'Behind', lastUpdated: '2024-02-01', document: 'ss_syllabus.pdf' },
-  { id: 5, subjectId: 5, subjectName: 'Hindi', classId: 10, className: 'Class 10', term: 'Term 1', totalTopics: 10, completedTopics: 9, status: 'On Track', lastUpdated: '2024-02-05' },
-];
-
-const mockClasses = [
-  { id: 1, name: 'Class 1' },
-  { id: 2, name: 'Class 2' },
-  { id: 10, name: 'Class 10' },
-];
-
-const mockSubjects = [
-  { id: 1, name: 'Mathematics' },
-  { id: 2, name: 'Science' },
-  { id: 3, name: 'English' },
-  { id: 4, name: 'Social Science' },
-  { id: 5, name: 'Hindi' },
-];
-
-const terms = ['Term 1', 'Term 2', 'Term 3'];
+// Mock data removed. Using real services for classes and subjects.
 
 export const SyllabusManagementPage = () => {
   const navigate = useNavigate();
-  const [syllabusItems, setSyllabusItems] = useState(mockSyllabus);
+  const [syllabusItems, setSyllabusItems] = useState<SyllabusItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SyllabusItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterClass, setFilterClass] = useState('all');
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
+  const [filterClassId, setFilterClassId] = useState<string>('all');
+  const [filterClassName, setFilterClassName] = useState<string>('');
+
+  useEffect(() => {
+    fetchSyllabus();
+  }, [filterClassId]);
 
   const calculateStatus = (completed: number, total: number): 'On Track' | 'Behind' | 'Completed' => {
+    if (!total) return 'Behind';
     const percentage = (completed / total) * 100;
     if (percentage === 100) return 'Completed';
     if (percentage >= 70) return 'On Track';
     return 'Behind';
+  };
+
+  const fetchSyllabus = async () => {
+    setIsLoading(true);
+    try {
+      const classId = filterClassId === 'all' ? undefined : parseInt(filterClassId);
+      const data = await getSyllabusList(classId);
+      setSyllabusItems(data);
+    } catch (error) {
+      toast.error('Failed to load syllabus items');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleOpenModal = (item: SyllabusItem | null = null) => {
@@ -79,59 +70,54 @@ export const SyllabusManagementPage = () => {
     setIsModalOpen(false);
   };
 
-  const handleSave = (data: any) => {
-    const classInfo = mockClasses.find(c => c.id === data.classId);
-    const subjectInfo = mockSubjects.find(s => s.id === data.subjectId);
-    const status = calculateStatus(data.completedTopics, data.totalTopics);
+  const handleSave = async (data: Partial<SyllabusItem>) => {
+    const status = calculateStatus(data.completedTopics || 0, data.totalTopics || 0);
 
-    if (editingItem) {
-      setSyllabusItems(syllabusItems.map(item =>
-        item.id === editingItem.id
-          ? {
-            ...item,
-            classId: data.classId,
-            className: classInfo?.name || '',
-            subjectId: data.subjectId,
-            subjectName: subjectInfo?.name || '',
-            term: data.term,
-            totalTopics: data.totalTopics,
-            completedTopics: data.completedTopics,
-            status,
-            lastUpdated: new Date().toISOString().split('T')[0],
-            document: data.document
-          }
-          : item
-      ));
-    } else {
-      const newItem: SyllabusItem = {
-        id: Date.now(),
-        classId: data.classId,
-        className: classInfo?.name || '',
-        subjectId: data.subjectId,
-        subjectName: subjectInfo?.name || '',
-        term: data.term,
-        totalTopics: data.totalTopics,
-        completedTopics: data.completedTopics,
-        status,
-        lastUpdated: new Date().toISOString().split('T')[0],
-        document: data.document
-      };
-      setSyllabusItems([...syllabusItems, newItem]);
+    try {
+      if (editingItem) {
+        await updateSyllabus(editingItem.id, {
+          ...data,
+          status,
+        });
+        toast.success('Syllabus updated successfully');
+      } else {
+        await createSyllabus({
+          ...data,
+          status,
+        });
+        toast.success('Syllabus created successfully');
+      }
+      fetchSyllabus();
+      handleCloseModal();
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to save syllabus';
+      toast.error(message);
     }
-    handleCloseModal();
   };
 
-  const deleteItem = (id: number) => {
-    if (confirm('Are you sure you want to delete this syllabus entry?')) {
-      setSyllabusItems(syllabusItems.filter(item => item.id !== id));
+  const confirmDelete = (id: number) => {
+    setItemToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await deleteSyllabus(itemToDelete);
+      toast.success('Syllabus deleted successfully');
+      fetchSyllabus();
+    } catch (error) {
+      toast.error('Failed to delete syllabus');
+    } finally {
+      setDeleteModalOpen(false);
+      setItemToDelete(null);
     }
   };
 
   const filteredItems = syllabusItems.filter(item => {
     const matchesSearch = item.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.className.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesClass = filterClass === 'all' || item.classId === parseInt(filterClass);
-    return matchesSearch && matchesClass;
+    return matchesSearch;
   });
 
   const getStatusColor = (status: string) => {
@@ -239,18 +225,20 @@ export const SyllabusManagementPage = () => {
             className="w-full pl-12 pr-4 py-3 bg-white/50 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
           />
         </div>
-        <div className="relative">
-          <select
-            value={filterClass}
-            onChange={(e) => setFilterClass(e.target.value)}
-            className="appearance-none pl-4 pr-10 py-3 bg-white/50 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700 font-medium min-w-[200px]"
-          >
-            <option value="all">All Classes</option>
-            {mockClasses.map(cls => (
-              <option key={cls.id} value={cls.id}>{cls.name}</option>
-            ))}
-          </select>
-          <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+        <div className="w-[240px]">
+          <CommonSearchTextbox
+            searchConfig={COMMON_SEARCH_CONFIGS.className}
+            value={filterClassName}
+            onChange={(val) => {
+              setFilterClassName(val);
+              if (!val) setFilterClassId('all');
+            }}
+            onSelect={(item: CommonSearchItem) => {
+              setFilterClassId(item.id.toString());
+              setFilterClassName(item.label);
+            }}
+            placeholder="Filter by class..."
+          />
         </div>
       </div>
 
@@ -285,7 +273,7 @@ export const SyllabusManagementPage = () => {
                     <Edit2 size={16} />
                   </button>
                   <button
-                    onClick={() => deleteItem(item.id)}
+                    onClick={() => confirmDelete(item.id)}
                     className="p-2 text-gray-400 hover:text-red-600 hover:bg-white rounded-lg transition-colors"
                   >
                     <Trash2 size={16} />
@@ -309,7 +297,7 @@ export const SyllabusManagementPage = () => {
                   <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
                     <div
                       className={`h-full transition-all rounded-full ${progressPercentage === 100 ? 'bg-emerald-500' :
-                          progressPercentage >= 70 ? 'bg-blue-500' : 'bg-red-500'
+                        progressPercentage >= 70 ? 'bg-blue-500' : 'bg-red-500'
                         }`}
                       style={{ width: `${progressPercentage}%` }}
                     />
@@ -342,9 +330,15 @@ export const SyllabusManagementPage = () => {
         onClose={handleCloseModal}
         onSave={handleSave}
         editingItem={editingItem}
-        classes={mockClasses}
-        subjects={mockSubjects}
-        terms={terms}
+      />
+
+      <ConfirmActionModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        title="Delete Syllabus"
+        description="Are you sure you want to delete this syllabus entry? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );
