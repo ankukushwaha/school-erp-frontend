@@ -14,9 +14,6 @@ interface TeacherAllocationModalProps {
   onClose: () => void;
   onSave: (allocationData: any) => void;
   editingAllocation: any | null;
-  teachers: any[];
-  classes: any[];
-  classSections: any[];
 }
 
 export const TeacherAllocationModal: React.FC<TeacherAllocationModalProps> = ({
@@ -25,6 +22,9 @@ export const TeacherAllocationModal: React.FC<TeacherAllocationModalProps> = ({
   onSave,
   editingAllocation,
 }) => {
+  const [selectedAcademicYearId, setSelectedAcademicYearId] = useState('');
+  const [academicYearName, setAcademicYearName] = useState('');
+
   const [selectedTeacherId, setSelectedTeacherId] = useState('');
   const [teacherName, setTeacherName] = useState('');
 
@@ -38,6 +38,9 @@ export const TeacherAllocationModal: React.FC<TeacherAllocationModalProps> = ({
 
   useEffect(() => {
     if (editingAllocation) {
+      setSelectedAcademicYearId(editingAllocation.academicYearId?.toString() || '');
+      setAcademicYearName(editingAllocation.academicYearName || '');
+
       setSelectedTeacherId(editingAllocation.teacherId.toString());
       setTeacherName(editingAllocation.teacherName || '');
 
@@ -49,6 +52,8 @@ export const TeacherAllocationModal: React.FC<TeacherAllocationModalProps> = ({
 
       setSelectedSubjects(editingAllocation.subjects || []);
     } else {
+      setSelectedAcademicYearId('');
+      setAcademicYearName('');
       setSelectedTeacherId('');
       setTeacherName('');
       setSelectedClassId('');
@@ -64,6 +69,7 @@ export const TeacherAllocationModal: React.FC<TeacherAllocationModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
+      academicYearId: parseInt(selectedAcademicYearId),
       teacherId: parseInt(selectedTeacherId),
       classId: parseInt(selectedClassId),
       sectionId: parseInt(selectedSectionId),
@@ -98,24 +104,46 @@ export const TeacherAllocationModal: React.FC<TeacherAllocationModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-              Select Teacher <span className="text-red-500">*</span>
-            </label>
-            <CommonSearchTextbox
-              searchConfig={COMMON_SEARCH_CONFIGS.teacherName}
-              value={teacherName}
-              onChange={(val) => {
-                setTeacherName(val);
-                if (!val) setSelectedTeacherId('');
-              }}
-              onSelect={(item: CommonSearchItem) => {
-                setSelectedTeacherId(item.id.toString());
-                setTeacherName(item.label);
-              }}
-              placeholder="Search teacher by name or code..."
-              required
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Academic Year <span className="text-red-500">*</span>
+              </label>
+              <CommonSearchTextbox
+                searchConfig={COMMON_SEARCH_CONFIGS.academicYear}
+                value={academicYearName}
+                onChange={(val) => {
+                  setAcademicYearName(val);
+                  if (!val) setSelectedAcademicYearId('');
+                }}
+                onSelect={(item: CommonSearchItem) => {
+                  setSelectedAcademicYearId(item.id.toString());
+                  setAcademicYearName(item.label);
+                }}
+                placeholder="Search year..."
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Select Teacher <span className="text-red-500">*</span>
+              </label>
+              <CommonSearchTextbox
+                searchConfig={COMMON_SEARCH_CONFIGS.teacherName}
+                value={teacherName}
+                onChange={(val) => {
+                  setTeacherName(val);
+                  if (!val) setSelectedTeacherId('');
+                }}
+                onSelect={(item: CommonSearchItem) => {
+                  setSelectedTeacherId(item.id.toString());
+                  setTeacherName(item.label);
+                }}
+                placeholder="Search teacher..."
+                required
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

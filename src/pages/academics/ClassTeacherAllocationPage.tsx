@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { TeacherAllocationModal } from '@/components/modal/academics/TeacherAllocationModal';
+import { ConfirmActionModal } from '@/components/modal/academics/ConfirmActionModal';
 import {
   getClassTeacherAllocations,
   createClassTeacherAllocation,
@@ -22,47 +23,23 @@ import {
   deleteClassTeacherAllocation,
   type ClassTeacherAllocation
 } from '@/services/classTeacherAllocation';
-import { getClasses, type SchoolClass } from '@/services/classes';
-import { getClassSections, type ClassSection } from '@/services/classSections';
-import { getAcademicYears } from '@/services/academicYears';
-import { getCommonSearchResults } from '@/services/commonSearch';
-import { COMMON_SEARCH_CONFIGS } from '@/app/constants/commonSearchConfigs';
 import { toast } from 'sonner';
 
 export const ClassTeacherAllocationPage = () => {
   const navigate = useNavigate();
   const [allocations, setAllocations] = useState<ClassTeacherAllocation[]>([]);
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [classes, setClasses] = useState<SchoolClass[]>([]);
-  const [classSections, setClassSections] = useState<ClassSection[]>([]);
-  const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAllocation, setEditingAllocation] = useState<ClassTeacherAllocation | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [allocationToDelete, setAllocationToDelete] = useState<number | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [allocData, teacherItems, classData, sectionData, ayData] = await Promise.all([
-        getClassTeacherAllocations(),
-        getCommonSearchResults({ ...COMMON_SEARCH_CONFIGS.teacherName, searchTerm: '' }),
-        getClasses(),
-        getClassSections(),
-        getAcademicYears()
-      ]);
-
-      const teacherList = teacherItems.map(item => ({
-        id: item.id,
-        fullName: item.label,
-        ...item.raw
-      }));
-
+      const allocData = await getClassTeacherAllocations();
       setAllocations(allocData);
-      setTeachers(teacherList);
-      setClasses(classData);
-      setClassSections(sectionData);
-      setAcademicYears(ayData);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load allocation data');
@@ -87,9 +64,8 @@ export const ClassTeacherAllocationPage = () => {
 
   const handleSave = async (data: any) => {
     try {
-      const currentAY = academicYears.find(ay => ay.isCurrent) || academicYears[0];
       const payload = {
-        academicYearId: currentAY?.academicYearId || 1,
+        academicYearId: data.academicYearId,
         schoolId: 1, // Defaulting to 1 for now
         classId: data.classId,
         sectionId: data.sectionId,
@@ -115,16 +91,23 @@ export const ClassTeacherAllocationPage = () => {
     }
   };
 
-  const deleteAllocation = async (id: number) => {
-    if (confirm('Are you sure you want to remove this class teacher allocation?')) {
-      try {
-        await deleteClassTeacherAllocation(id, 'ADMIN');
-        toast.success('Allocation removed successfully');
-        fetchData();
-      } catch (error) {
-        console.error('Error deleting allocation:', error);
-        toast.error('Failed to remove allocation');
-      }
+  const confirmDelete = (id: number) => {
+    setAllocationToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  const deleteAllocation = async () => {
+    if (!allocationToDelete) return;
+    try {
+      await deleteClassTeacherAllocation(allocationToDelete, 'ADMIN');
+      toast.success('Allocation removed successfully');
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting allocation:', error);
+      toast.error('Failed to remove allocation');
+    } finally {
+      setDeleteModalOpen(false);
+      setAllocationToDelete(null);
     }
   };
 
@@ -253,7 +236,7 @@ export const ClassTeacherAllocationPage = () => {
                   <Edit2 size={16} />
                 </button>
                 <button
-                  onClick={() => deleteAllocation(alloc.id)}
+                  onClick={() => confirmDelete(alloc.id)}
                   className="p-2 text-gray-400 hover:text-red-600 hover:bg-white rounded-lg transition-colors"
                 >
                   <Trash2 size={16} />
@@ -277,6 +260,13 @@ export const ClassTeacherAllocationPage = () => {
                 <span className="text-sm font-bold text-gray-700">Assigned Class</span>
                 <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold">
                   {alloc.className} - {alloc.sectionName}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-bold text-gray-700">Academic Year</span>
+                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold">
+                  {alloc.academicYearName}
                 </span>
               </div>
 
@@ -309,9 +299,15 @@ export const ClassTeacherAllocationPage = () => {
         onClose={handleCloseModal}
         onSave={handleSave}
         editingAllocation={editingAllocation}
-        teachers={teachers}
-        classes={classes}
-        classSections={classSections}
+      />
+
+      <ConfirmActionModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        title="Remove Allocation"
+        description="Are you sure you want to remove this class teacher allocation?"
+        confirmLabel="Remove"
+        onConfirm={deleteAllocation}
       />
     </div>
   );
