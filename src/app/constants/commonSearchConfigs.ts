@@ -82,4 +82,13 @@ export const COMMON_SEARCH_CONFIGS = {
     otherCondition: 'del_status = false',
     sortBy: 'event_type_id',
   },
+  syllabusName: {
+    schemaName: 's_core',
+    tableName: 'syllabus',
+    columnId: 'syllabus_id',
+    displayColumns: 'syllabus_name,academic_year',
+    displayName: 'syllabus_name',
+    otherCondition: 'del_status = false',
+    sortBy: 'syllabus_id',
+  },
 } as const satisfies Record<string, CommonSearchBaseParams>

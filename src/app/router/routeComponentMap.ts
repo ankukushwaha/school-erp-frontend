@@ -9,6 +9,7 @@ import { SubjectMappingPage } from '@/pages/academics/SubjectMappingPage'
 import { ClassTeacherAllocationPage } from '@/pages/academics/ClassTeacherAllocationPage'
 import { SyllabusManagementPage } from '@/pages/academics/SyllabusManagementPage'
 import { LessonPlanPage } from '@/pages/academics/LessonPlanPage'
+import { ChapterMapping } from '@/pages/academics/ChapterMapping'
 import { AdmissionDashboard } from '@/pages/admission/AdmissionDashboard'
 import { AdmissionsOverviewPage } from '@/pages/admission/AdmissionOverview'
 import { EnquiryFormPage } from '@/pages/admission/EnquiryFormPage'
@@ -49,6 +50,7 @@ export const routeComponentMap: Record<string, ComponentType> = {
   '/academics/teacher-allocation': ClassTeacherAllocationPage,
   '/academics/syllabus-management': SyllabusManagementPage,
   '/academics/lesson-plans': LessonPlanPage,
+  '/academics/chapter': ChapterMapping,
 }
 
 export function getComponentForRoute(path: string): ComponentType {

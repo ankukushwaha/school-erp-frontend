@@ -96,6 +96,15 @@ const quickAccessCards = [
     title: 'Lesson Plans',
     description: 'Create and track daily teaching strategies',
   },
+  {
+    to: '/academics/chapter',
+    gradient: 'from-emerald-500 to-teal-600',
+    icon: Layers,
+    stat: '24',
+    statLabel: 'Topics',
+    title: 'Chapter Mapping',
+    description: 'Map chapters and topics to curriculum',
+  },
 ]
 
 const summaryStats = [

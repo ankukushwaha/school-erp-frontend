@@ -23,6 +23,7 @@ export const ROUTES = {
   syllabusManagement: '/academics/syllabus-management',
   lessonPlan: '/academics/lesson-plans',
   timetableManagement: '/academics/timetable',
+  chapterMapping: '/academics/chapter',
 } as const
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES]
