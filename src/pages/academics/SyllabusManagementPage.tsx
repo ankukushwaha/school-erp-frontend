@@ -6,6 +6,7 @@ import {
   BookMarked,
   Plus,
   Edit2,
+  List,
   Trash2,
   FileText,
   Search,
@@ -257,7 +258,7 @@ export const SyllabusManagementPage = () => {
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
                     <BookMarked size={28} />
                   </div>
-                   <div>
+                  <div>
                     <h3 className="text-lg font-bold text-gray-800">{item.syllabusName || item.subjectName}</h3>
                     {item.syllabusName && (
                       <p className="text-xs font-medium text-indigo-500 mt-0.5">{item.subjectName}</p>
@@ -270,6 +271,13 @@ export const SyllabusManagementPage = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => navigate(`/academics/chapter?syllabusId=${item.id}`)}
+                    className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-white rounded-lg transition-colors"
+                    title="Manage Chapters"
+                  >
+                    <List size={16} />
+                  </button>
                   <button
                     onClick={() => handleOpenModal(item)}
                     className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-white rounded-lg transition-colors"

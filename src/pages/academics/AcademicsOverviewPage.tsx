@@ -5,6 +5,7 @@ import {
   FileText,
   GraduationCap,
   Layers,
+  Target,
   Users,
   TrendingUp,
   Award,
@@ -101,9 +102,18 @@ const quickAccessCards = [
     gradient: 'from-emerald-500 to-teal-600',
     icon: Layers,
     stat: '24',
-    statLabel: 'Topics',
+    statLabel: 'Chapters',
     title: 'Chapter Mapping',
     description: 'Map chapters and topics to curriculum',
+  },
+  {
+    to: '/academics/chapter/topic',
+    gradient: 'from-purple-500 to-indigo-600',
+    icon: Target,
+    stat: '156',
+    statLabel: 'Topics',
+    title: 'Topic Mapping',
+    description: 'Manage individual topics within chapters',
   },
 ]
 

@@ -91,4 +91,13 @@ export const COMMON_SEARCH_CONFIGS = {
     otherCondition: 'del_status = false',
     sortBy: 'syllabus_id',
   },
+  chapterName: {
+    schemaName: 's_core',
+    tableName: 'syllabus_chapter',
+    columnId: 'syllabus_chapter_id',
+    displayColumns: 'chapter_name',
+    displayName: 'chapter_name',
+    otherCondition: 'del_status = false',
+    sortBy: 'chapter_order',
+  },
 } as const satisfies Record<string, CommonSearchBaseParams>

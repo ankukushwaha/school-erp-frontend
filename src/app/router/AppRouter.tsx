@@ -14,6 +14,7 @@ import { ClassTeacherAllocationPage } from '@/pages/academics/ClassTeacherAlloca
 import { SyllabusManagementPage } from '@/pages/academics/SyllabusManagementPage'
 import { LessonPlanPage } from '@/pages/academics/LessonPlanPage'
 import { ChapterMapping } from '@/pages/academics/ChapterMapping'
+import { TopicMapping } from '@/pages/academics/TopicMapping'
 import { TimetableManagementPage } from '@/pages/academics/TimetableManagementPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
@@ -57,6 +58,7 @@ export function AppRouter() {
         path !== ROUTES.syllabusManagement &&
         path !== ROUTES.lessonPlan &&
         path !== ROUTES.chapterMapping &&
+        path !== ROUTES.topicMapping &&
         path !== ROUTES.timetableManagement
     )
   }, [menuItems])
@@ -82,6 +84,7 @@ export function AppRouter() {
             <Route path={ROUTES.syllabusManagement} element={<SyllabusManagementPage />} />
             <Route path={ROUTES.lessonPlan} element={<LessonPlanPage />} />
             <Route path={ROUTES.chapterMapping} element={<ChapterMapping />} />
+            <Route path={ROUTES.topicMapping} element={<TopicMapping />} />
             <Route path={ROUTES.timetableManagement} element={<TimetableManagementPage />} />
             <Route path={ROUTES.profile} element={<ProfilePage />} />
             <Route path={ROUTES.setting} element={<SettingsPage />} />

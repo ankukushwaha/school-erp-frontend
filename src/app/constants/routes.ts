@@ -24,6 +24,7 @@ export const ROUTES = {
   lessonPlan: '/academics/lesson-plans',
   timetableManagement: '/academics/timetable',
   chapterMapping: '/academics/chapter',
+  topicMapping: '/academics/chapter/topic',
 } as const
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES]

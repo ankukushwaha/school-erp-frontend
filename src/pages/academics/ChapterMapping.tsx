@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   Clock,
   ChevronRight,
+  List,
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SyllabusChapterModal } from '@/components/modal/academics/SyllabusChapterModal';
@@ -266,6 +267,13 @@ export const ChapterMapping = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => navigate(`/academics/chapter/topic?chapterId=${chapter.syllabusChapterId}`)}
+                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-white rounded-lg transition-all"
+                          title="Manage Topics"
+                        >
+                          <List size={18} />
+                        </button>
                         <button
                           onClick={() => handleOpenModal(chapter)}
                           className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-white rounded-lg transition-all"
