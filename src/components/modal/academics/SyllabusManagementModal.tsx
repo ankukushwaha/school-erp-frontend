@@ -35,6 +35,7 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
   const [totalTopics, setTotalTopics] = useState('');
   const [completedTopics, setCompletedTopics] = useState('');
   const [document, setDocument] = useState('');
+  const [syllabusName, setSyllabusName] = useState('');
 
   useEffect(() => {
     if (editingItem) {
@@ -47,6 +48,7 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
       setTotalTopics(editingItem.totalTopics?.toString() || '');
       setCompletedTopics(editingItem.completedTopics?.toString() || '');
       setDocument(editingItem.document || '');
+      setSyllabusName(editingItem.syllabusName || '');
     } else {
       setSelectedClassId('');
       setClassName('');
@@ -57,6 +59,7 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
       setTotalTopics('');
       setCompletedTopics('');
       setDocument('');
+      setSyllabusName('');
     }
   }, [editingItem, isOpen]);
 
@@ -71,7 +74,8 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
       academicYear,
       totalTopics: parseInt(totalTopics),
       completedTopics: parseInt(completedTopics),
-      document
+      document,
+      syllabusName,
     });
   };
 
@@ -136,6 +140,19 @@ export const SyllabusManagementModal: React.FC<SyllabusManagementModalProps> = (
                 required
               />
             </div>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+              Syllabus Name
+            </label>
+            <input
+              type="text"
+              value={syllabusName}
+              onChange={(e) => setSyllabusName(e.target.value)}
+              placeholder="e.g. Mathematics - Term 1"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700 transition-all"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

@@ -2,6 +2,7 @@ import { backendApi } from './backendApi';
 
 export interface SyllabusItem {
   id: number;
+  syllabusName?: string;
   subjectId: number;
   subjectName: string;
   classId: number;

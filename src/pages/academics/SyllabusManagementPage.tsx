@@ -116,7 +116,8 @@ export const SyllabusManagementPage = () => {
 
   const filteredItems = syllabusItems.filter(item => {
     const matchesSearch = item.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.className.toLowerCase().includes(searchTerm.toLowerCase());
+      item.className.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.syllabusName && item.syllabusName.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesSearch;
   });
 
@@ -256,8 +257,11 @@ export const SyllabusManagementPage = () => {
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
                     <BookMarked size={28} />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-800">{item.subjectName}</h3>
+                   <div>
+                    <h3 className="text-lg font-bold text-gray-800">{item.syllabusName || item.subjectName}</h3>
+                    {item.syllabusName && (
+                      <p className="text-xs font-medium text-indigo-500 mt-0.5">{item.subjectName}</p>
+                    )}
                     <div className="flex items-center gap-3 mt-1">
                       <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{item.className}</span>
                       <span className="text-gray-300">•</span>
