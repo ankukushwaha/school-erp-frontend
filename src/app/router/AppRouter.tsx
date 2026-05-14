@@ -19,6 +19,7 @@ import { TimetableManagementPage } from '@/pages/academics/TimetableManagementPa
 import { HomeworkAssignmentSystemPage } from '@/pages/academics/HomeworkAssignmentPage'
 import { HomeworkManagementPage } from '@/pages/academics/HomeworkManagementPage'
 import { ProgressReportPage } from '@/pages/academics/ProgressReportPage'
+import { GradingSystemPage } from '@/pages/academics/GradingSystemPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
@@ -65,7 +66,8 @@ export function AppRouter() {
         path !== ROUTES.timetableManagement &&
         path !== ROUTES.assignmentSystem &&
         path !== ROUTES.homeworkManagement &&
-        path !== ROUTES.progressReport
+        path !== ROUTES.progressReport &&
+        path !== ROUTES.gradingSystem
     )
   }, [menuItems])
 
@@ -95,6 +97,7 @@ export function AppRouter() {
             <Route path={ROUTES.assignmentSystem} element={<HomeworkAssignmentSystemPage />} />
             <Route path={ROUTES.homeworkManagement} element={<HomeworkManagementPage />} />
             <Route path={ROUTES.progressReport} element={<ProgressReportPage />} />
+            <Route path={ROUTES.gradingSystem} element={<GradingSystemPage />} />
             <Route path={ROUTES.profile} element={<ProfilePage />} />
             <Route path={ROUTES.setting} element={<SettingsPage />} />
             {dynamicRoutePaths.map((path) => {

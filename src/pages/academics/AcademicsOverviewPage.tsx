@@ -142,6 +142,15 @@ const quickAccessCards = [
     title: 'Progress Reports',
     description: 'Generate and manage student academic reports',
   },
+  {
+    to: '/academics/grading-systems',
+    gradient: 'from-orange-500 to-amber-600',
+    icon: Target,
+    stat: 'GPA',
+    statLabel: 'Based',
+    title: 'Grading System',
+    description: 'Configure grade scales and class assignments',
+  },
 ]
 
 const summaryStats = [
