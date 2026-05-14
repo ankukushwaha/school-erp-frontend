@@ -16,6 +16,8 @@ import { LessonPlanPage } from '@/pages/academics/LessonPlanPage'
 import { ChapterMapping } from '@/pages/academics/ChapterMapping'
 import { TopicMapping } from '@/pages/academics/TopicMapping'
 import { TimetableManagementPage } from '@/pages/academics/TimetableManagementPage'
+import { HomeworkAssignmentSystemPage } from '@/pages/academics/HomeworkAssignmentPage'
+import { HomeworkManagementPage } from '@/pages/academics/HomeworkManagementPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
@@ -59,7 +61,9 @@ export function AppRouter() {
         path !== ROUTES.lessonPlan &&
         path !== ROUTES.chapterMapping &&
         path !== ROUTES.topicMapping &&
-        path !== ROUTES.timetableManagement
+        path !== ROUTES.timetableManagement &&
+        path !== ROUTES.assignmentSystem &&
+        path !== ROUTES.homeworkManagement
     )
   }, [menuItems])
 
@@ -86,6 +90,8 @@ export function AppRouter() {
             <Route path={ROUTES.chapterMapping} element={<ChapterMapping />} />
             <Route path={ROUTES.topicMapping} element={<TopicMapping />} />
             <Route path={ROUTES.timetableManagement} element={<TimetableManagementPage />} />
+            <Route path={ROUTES.assignmentSystem} element={<HomeworkAssignmentSystemPage />} />
+            <Route path={ROUTES.homeworkManagement} element={<HomeworkManagementPage />} />
             <Route path={ROUTES.profile} element={<ProfilePage />} />
             <Route path={ROUTES.setting} element={<SettingsPage />} />
             {dynamicRoutePaths.map((path) => {

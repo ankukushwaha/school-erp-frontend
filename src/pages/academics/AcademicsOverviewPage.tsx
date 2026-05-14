@@ -115,6 +115,24 @@ const quickAccessCards = [
     title: 'Topic Mapping',
     description: 'Manage individual topics within chapters',
   },
+  {
+    to: '/academics/assignment-systems',
+    gradient: 'from-orange-500 to-red-600',
+    icon: BookOpen,
+    stat: '4',
+    statLabel: 'Active',
+    title: 'Homework & Assignments',
+    description: 'Create, manage, and grade student assignments',
+  },
+  {
+    to: '/academics/homework-assignments',
+    gradient: 'from-blue-500 to-indigo-600',
+    icon: FileText,
+    stat: '8',
+    statLabel: 'Active',
+    title: 'Homework Management',
+    description: 'Manage and track student homework tasks',
+  },
 ]
 
 const summaryStats = [

@@ -8,6 +8,7 @@ export const ROUTES = {
   sectionManagement: '/academics/SectionManagement',
   subjectEntry: '/academics/subjectEntry',
   subjectMapping: '/academics/subject-mapping',
+  homeworkManagement: '/academics/homework-assignments',
   admission: '/admission/dashboard',
   admissionOverview: '/admission/overview',
   enquiryFormPage: '/admission/enquiry-form',
@@ -25,6 +26,7 @@ export const ROUTES = {
   timetableManagement: '/academics/timetable',
   chapterMapping: '/academics/chapter',
   topicMapping: '/academics/chapter/topic',
+  assignmentSystem: '/academics/assignment-systems',
 } as const
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES]
