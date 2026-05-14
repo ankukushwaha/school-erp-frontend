@@ -18,6 +18,7 @@ import { TopicMapping } from '@/pages/academics/TopicMapping'
 import { TimetableManagementPage } from '@/pages/academics/TimetableManagementPage'
 import { HomeworkAssignmentSystemPage } from '@/pages/academics/HomeworkAssignmentPage'
 import { HomeworkManagementPage } from '@/pages/academics/HomeworkManagementPage'
+import { ProgressReportPage } from '@/pages/academics/ProgressReportPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
@@ -63,7 +64,8 @@ export function AppRouter() {
         path !== ROUTES.topicMapping &&
         path !== ROUTES.timetableManagement &&
         path !== ROUTES.assignmentSystem &&
-        path !== ROUTES.homeworkManagement
+        path !== ROUTES.homeworkManagement &&
+        path !== ROUTES.progressReport
     )
   }, [menuItems])
 
@@ -92,6 +94,7 @@ export function AppRouter() {
             <Route path={ROUTES.timetableManagement} element={<TimetableManagementPage />} />
             <Route path={ROUTES.assignmentSystem} element={<HomeworkAssignmentSystemPage />} />
             <Route path={ROUTES.homeworkManagement} element={<HomeworkManagementPage />} />
+            <Route path={ROUTES.progressReport} element={<ProgressReportPage />} />
             <Route path={ROUTES.profile} element={<ProfilePage />} />
             <Route path={ROUTES.setting} element={<SettingsPage />} />
             {dynamicRoutePaths.map((path) => {

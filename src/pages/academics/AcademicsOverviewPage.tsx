@@ -133,6 +133,15 @@ const quickAccessCards = [
     title: 'Homework Management',
     description: 'Manage and track student homework tasks',
   },
+  {
+    to: '/academics/progress-reports',
+    gradient: 'from-pink-500 to-rose-600',
+    icon: Award,
+    stat: '94%',
+    statLabel: 'Avg. Pass',
+    title: 'Progress Reports',
+    description: 'Generate and manage student academic reports',
+  },
 ]
 
 const summaryStats = [

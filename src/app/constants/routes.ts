@@ -27,6 +27,7 @@ export const ROUTES = {
   chapterMapping: '/academics/chapter',
   topicMapping: '/academics/chapter/topic',
   assignmentSystem: '/academics/assignment-systems',
+  progressReport: '/academics/progress-reports',
 } as const
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES]
